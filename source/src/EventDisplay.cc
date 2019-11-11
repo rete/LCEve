@@ -88,7 +88,7 @@ namespace lceve {
     cmd.add( dstModeArg ) ;
 
     TCLAP::ValueArg<int> detectorLevelArg( "l", "detector-level",
-      "The detector depth level to load", true, 1, "int") ;
+      "The detector depth level to load", false, 1, "int") ;
     cmd.add( detectorLevelArg ) ;
 
     cmd.parse( argc, argv ) ;
