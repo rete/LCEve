@@ -81,6 +81,7 @@ namespace lceve {
     }
     std::cout << "PreviousEvent(): Loaded event " << _currentEvent->getEventNumber() <<
       ", run " << _currentEvent->getRunNumber() << std::endl ;
+    _eventDisplay->VisualizeEvent( _currentEvent.get() ) ;
   }
 
   //--------------------------------------------------------------------------
@@ -104,6 +105,7 @@ namespace lceve {
     }
     std::cout << "NextEvent(): Loaded event " << _currentEvent->getEventNumber() <<
       ", run " << _currentEvent->getRunNumber() << std::endl ;
+    _eventDisplay->VisualizeEvent( _currentEvent.get() ) ;
   }
 
 }

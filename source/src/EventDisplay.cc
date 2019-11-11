@@ -2,6 +2,7 @@
 // -- lceve headers
 #include <LCEve/EventDisplay.h>
 #include <LCEve/EventNavigator.h>
+#include <LCEve/LCCollectionBuilder.h>
 #include <LCEve/Geometry.h>
 
 // -- tclap headers
@@ -11,6 +12,9 @@
 // -- root headers
 #include <ROOT/REveScene.hxx>
 #include <TEnv.h>
+
+// -- lcio headers
+#include <EVENT/LCEvent.h>
 
 ClassImp( lceve::EventDisplay )
 
@@ -134,6 +138,21 @@ namespace lceve {
     if( GetApplication() ) {
       GetApplication()->Terminate() ;
     }
+  }
+
+  //--------------------------------------------------------------------------
+
+  void EventDisplay::VisualizeEvent( const EVENT::LCEvent *const event ) {
+    // Cleanup current event scene
+    REveElement::List_t eventScenes {} ;
+    eventScenes.push_back( GetEveManager()->GetEventScene() ) ;
+    GetEveManager()->DestroyElementsOf( eventScenes ) ;
+    // Load new event in event scene
+    LCCollectionConverter converter( this ) ;
+    converter.VisualizeEvent( event, GetEveManager()->GetEventScene() ) ;
+    /// Send event to clients
+    GetEveManager()->BroadcastElementsOf( eventScenes ) ;
+    GetEveManager()->FullRedraw3D() ;
   }
 
 }

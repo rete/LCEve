@@ -6,6 +6,10 @@ namespace REX = ROOT::Experimental ;
 // -- lceve headers
 #include <LCEve/Settings.h>
 
+namespace EVENT {
+  class LCEvent ;
+}
+
 namespace lceve {
 
   class EventNavigator ;
@@ -44,6 +48,9 @@ namespace lceve {
     Geometry *GetGeometry() const ;
     /// Get the application settings
     const Settings &GetSettings() const ;
+
+    /// Visualize the LCIO event
+    void VisualizeEvent( const EVENT::LCEvent *const event ) ;
 
   private:
     TApplication                     *_application {nullptr} ;

@@ -1,11 +1,13 @@
 
 // -- lcio headers
+#include <EVENT/LCEvent.h>
 #include <EVENT/Track.h>
 #include <EVENT/LCCollection.h>
 
 // -- root headers
 #include <ROOT/REveElement.hxx>
 #include <ROOT/REveTrack.hxx>
+#include <ROOT/REveScene.hxx>
 namespace REX = ROOT::Experimental ;
 
 namespace lceve {
@@ -22,12 +24,12 @@ namespace lceve {
     /// Constructor
     LCCollectionConverter( EventDisplay *lced ) ;
 
-    /// Convert the lcio collection to a list of Eve elements
-    REX::REveElement *CreateEveElementList( EVENT::LCCollection *collection ) ;
+    /// Load the LCIO event in the Eve scene
+    void VisualizeEvent( const EVENT::LCEvent *event, REX::REveScene *scene ) ;
+
     /// Convert LCIO tracks to Eve tracks
     REX::REveElement *CreateEveTracks( const EVENT::LCCollection *const collection,
-                                       const std::string &name,
-                                       REX::REveElement *parent ) ;
+                                       const std::string &name ) ;
 
   private:
     EventDisplay             *_eventDisplay {nullptr} ;
