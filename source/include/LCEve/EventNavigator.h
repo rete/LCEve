@@ -39,7 +39,7 @@ namespace lceve {
     /// Initialize the event navigator
     void Init() ;
     /// Open a new LCIO file
-    void Open( const std::string &fname ) ;
+    void Open( const std::vector<std::string> &fnames ) ;
     /// [Slot] Go to previous event
     void PreviousEvent() ;
     /// [Slot] Go to next event

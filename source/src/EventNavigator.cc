@@ -39,8 +39,8 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  void EventNavigator::Open( const std::string &fname ) {
-    _lcReader->open( fname ) ;
+  void EventNavigator::Open( const std::vector<std::string> &fnames ) {
+    _lcReader->open( fnames ) ;
     _runEventIds.clear() ;
     EVENT::IntVec eventRunIds ;
     _lcReader->getEvents( eventRunIds ) ;

@@ -66,9 +66,9 @@ namespace lceve {
     /// Create and parse the command line
     TCLAP::CmdLine cmd("LCEve: Linear Collider EVEnt display", ' ', "master") ;
 
-    TCLAP::ValueArg<std::string> lcioFileArg( "f", "lcio-file",
-      "The input LCIO file", false, "", "string") ;
-    cmd.add( lcioFileArg ) ;
+    TCLAP::MultiArg<std::string> lcioFilesArg( "f", "lcio-file",
+      "The input LCIO file(s)", false, "vector<string>") ;
+    cmd.add( lcioFilesArg ) ;
 
     TCLAP::ValueArg<std::string> compactFileArg( "g", "geometry",
       "The DD4hep geometry compact file", true, "", "string") ;
@@ -113,8 +113,8 @@ namespace lceve {
     /// Initialize the LCIO event navigator
     _navigator->Init() ;
     /// Open the LCIO files if any
-    if( lcioFileArg.isSet() ) {
-      _navigator->Open( lcioFileArg.getValue() ) ;
+    if( lcioFilesArg.isSet() ) {
+      _navigator->Open( lcioFilesArg.getValue() ) ;
     }
   }
 
