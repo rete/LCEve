@@ -32,7 +32,7 @@ The standard help switch is your friend:
 ```
 
 As of today:
-```
+```shell
 # Just with the geometry
 ./bin/LCEve -c /path/to/your/compactfile.xml
 # Geometry and LCIO events
