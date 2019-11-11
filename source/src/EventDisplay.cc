@@ -63,8 +63,7 @@ namespace lceve {
   //--------------------------------------------------------------------------
 
   void EventDisplay::Init( int argc, const char **argv ) {
-    _application = new TApplication( "LCEve application", nullptr, nullptr ) ;
-
+    /// Create and parse the command line
     TCLAP::CmdLine cmd("LCEve: Linear Collider EVEnt display", ' ', "master") ;
 
     TCLAP::ValueArg<std::string> lcioFileArg( "f", "lcio-file",
@@ -93,6 +92,7 @@ namespace lceve {
 
     cmd.parse( argc, argv ) ;
 
+    /// Fill the application settings with parsed values
     if( readColNamesArg.isSet() ) {
       _settings.SetReadCollectionNames( readColNamesArg.getValue() ) ;
     }
@@ -100,13 +100,19 @@ namespace lceve {
     _settings.SetDSTMode( dstModeArg.getValue() ) ;
     _settings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
 
+    // Create the ROOT application running the event loop
+    _application = new TApplication( "LCEve application", nullptr, nullptr ) ;
+
+    /// Create the Eve manager
     _eveManager = REX::REveManager::Create() ;
-    _geometry->LoadCompactFile( compactFileArg.getValue() ) ;
     _eveManager->GetWorld()->AddElement( this ) ;
     _eveManager->GetWorld()->AddCommand( "QuitRoot", "sap-icon://log", this, "QuitRoot()" ) ;
 
+    /// Load the DD4hep compact file
+    _geometry->LoadCompactFile( compactFileArg.getValue() ) ;
+    /// Initialize the LCIO event navigator
     _navigator->Init() ;
-
+    /// Open the LCIO files if any
     if( lcioFileArg.isSet() ) {
       _navigator->Open( lcioFileArg.getValue() ) ;
     }
