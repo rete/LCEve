@@ -189,9 +189,7 @@ namespace lceve {
 
   void Geometry::LoadGeometry( dd4hep::Detector &detector ) {
     dd4hep::DetElement world = detector.world();
-    // TODO: replace value by a parameter from global settings
-    // int levels = std::numeric_limits<int>::max() ;
-    int levels = 1 ;
+    int levels = _eventDisplay->GetSettings().GetDetectorLevel() ;
     const dd4hep::DetElement::Children& c = world.children();
     if ( c.size() == 0 )   {
       std::cout << "It looks like there is no Geometry loaded. No event display availible." << std::endl ;

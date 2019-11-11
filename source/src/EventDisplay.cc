@@ -56,6 +56,12 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
+  const Settings &EventDisplay::GetSettings() const {
+    return _settings ;
+  }
+
+  //--------------------------------------------------------------------------
+
   void EventDisplay::Init( int argc, const char **argv ) {
     _application = new TApplication( "LCEve application", nullptr, nullptr ) ;
 
@@ -65,11 +71,34 @@ namespace lceve {
       "The input LCIO file", false, "", "string") ;
     cmd.add( lcioFileArg ) ;
 
-    TCLAP::ValueArg<std::string> compactFileArg( "c", "compact-file",
+    TCLAP::ValueArg<std::string> compactFileArg( "g", "geometry",
       "The DD4hep geometry compact file", true, "", "string") ;
     cmd.add( compactFileArg ) ;
 
+    TCLAP::MultiArg<std::string> readColNamesArg( "c", "lcio-collections",
+      "The list of LCIO collection to read only", false, "vector<string>") ;
+    cmd.add( readColNamesArg ) ;
+
+    TCLAP::SwitchArg serverModeArg( "s", "server-mode",
+      "Whether to run in server mode. Do not show any window on startup but the url only", false) ;
+    cmd.add( serverModeArg ) ;
+
+    TCLAP::SwitchArg dstModeArg( "d", "dst-mode",
+      "Whether to display LCIO event in DST mode. Draw only reconstructed quantities with dedicated display", false) ;
+    cmd.add( dstModeArg ) ;
+
+    TCLAP::ValueArg<int> detectorLevelArg( "l", "detector-level",
+      "The detector depth level to load", true, 1, "int") ;
+    cmd.add( detectorLevelArg ) ;
+
     cmd.parse( argc, argv ) ;
+
+    if( readColNamesArg.isSet() ) {
+      _settings.SetReadCollectionNames( readColNamesArg.getValue() ) ;
+    }
+    _settings.SetServerMode( serverModeArg.getValue() ) ;
+    _settings.SetDSTMode( dstModeArg.getValue() ) ;
+    _settings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
 
     _eveManager = REX::REveManager::Create() ;
     _geometry->LoadCompactFile( compactFileArg.getValue() ) ;
@@ -86,7 +115,9 @@ namespace lceve {
   //--------------------------------------------------------------------------
 
   void EventDisplay::Run() {
-    gEnv->SetValue("WebEve.DisableShow", 1) ;
+    if( GetSettings().GetServerMode() ) {
+      gEnv->SetValue("WebEve.DisableShow", 1) ;
+    }
     GetEveManager()->Show() ;
     GetApplication()->Run() ;
   }

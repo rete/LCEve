@@ -3,6 +3,9 @@
 #include <TApplication.h>
 namespace REX = ROOT::Experimental ;
 
+// -- lceve headers
+#include <LCEve/Settings.h>
+
 namespace lceve {
 
   class EventNavigator ;
@@ -39,12 +42,15 @@ namespace lceve {
     TApplication *GetApplication() const ;
     /// Get the geometry handler
     Geometry *GetGeometry() const ;
+    /// Get the application settings
+    const Settings &GetSettings() const ;
 
   private:
     TApplication                     *_application {nullptr} ;
     REX::REveManager                 *_eveManager {nullptr} ;
     EventNavigator                   *_navigator {nullptr} ;
     Geometry                         *_geometry {nullptr} ;
+    Settings                          _settings {} ;
 
     ClassDef( EventDisplay, 0 ) ;
   };
