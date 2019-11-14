@@ -71,12 +71,18 @@ root_generate_dictionary(
   MODULE LCEve_lib
   LINKDEF ${LINKDEF_FILE}
 )
-#
-# LCEve executable compilation
-add_executable( LCEve_bin source/main/LCEve.cc )
-target_link_libraries( LCEve_bin LCEve_lib )
-set_target_properties( LCEve_bin PROPERTIES OUTPUT_NAME LCEve )
-install( TARGETS LCEve_bin RUNTIME )
+
+# LCEventDisplay executable compilation
+add_executable( LCEveDisplay_bin source/main/LCEveDisplay.cc )
+target_link_libraries( LCEveDisplay_bin LCEve_lib )
+set_target_properties( LCEveDisplay_bin PROPERTIES OUTPUT_NAME LCEveDisplay )
+install( TARGETS LCEveDisplay_bin RUNTIME )
+
+# LCGeomViewer executable compilation
+add_executable( LCGeomViewer_bin source/main/LCEveDisplay.cc )
+target_link_libraries( LCEveDisplay_bin LCEve_lib )
+set_target_properties( LCEveDisplay_bin PROPERTIES OUTPUT_NAME LCEveDisplay )
+install( TARGETS LCEveDisplay_bin RUNTIME )
 
 # display some variables and write them to cache
 display_std_variables()
