@@ -73,16 +73,16 @@ root_generate_dictionary(
 )
 
 # LCEventDisplay executable compilation
-add_executable( LCEveDisplay_bin source/main/LCEveDisplay.cc )
-target_link_libraries( LCEveDisplay_bin LCEve_lib )
-set_target_properties( LCEveDisplay_bin PROPERTIES OUTPUT_NAME LCEveDisplay )
-install( TARGETS LCEveDisplay_bin RUNTIME )
+add_executable( LCEventDisplay_bin source/main/LCEventDisplay.cc )
+target_link_libraries( LCEventDisplay_bin LCEve_lib )
+set_target_properties( LCEventDisplay_bin PROPERTIES OUTPUT_NAME LCEventDisplay )
+install( TARGETS LCEventDisplay_bin RUNTIME )
 
 # LCGeomViewer executable compilation
-add_executable( LCGeomViewer_bin source/main/LCEveDisplay.cc )
-target_link_libraries( LCEveDisplay_bin LCEve_lib )
-set_target_properties( LCEveDisplay_bin PROPERTIES OUTPUT_NAME LCEveDisplay )
-install( TARGETS LCEveDisplay_bin RUNTIME )
+add_executable( LCGeomViewer_bin source/main/LCGeomViewer.cc )
+target_link_libraries( LCGeomViewer_bin LCEve_lib )
+set_target_properties( LCGeomViewer_bin PROPERTIES OUTPUT_NAME LCGeomViewer )
+install( TARGETS LCGeomViewer_bin RUNTIME )
 
 # display some variables and write them to cache
 display_std_variables()
