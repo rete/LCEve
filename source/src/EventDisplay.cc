@@ -144,15 +144,15 @@ namespace lceve {
 
   void EventDisplay::VisualizeEvent( const EVENT::LCEvent *const event ) {
     // Cleanup current event scene
-    REveElement::List_t eventScenes {} ;
-    eventScenes.push_back( GetEveManager()->GetEventScene() ) ;
-    GetEveManager()->DestroyElementsOf( eventScenes ) ;
+    GetEveManager()->DisableRedraw() ;
+    auto scene = GetEveManager()->GetEventScene() ;
+    scene->DestroyElements() ;
     // Load new event in event scene
     LCCollectionConverter converter( this ) ;
-    converter.VisualizeEvent( event, GetEveManager()->GetEventScene() ) ;
+    converter.VisualizeEvent( event, scene ) ;
     /// Send event to clients
-    GetEveManager()->BroadcastElementsOf( eventScenes ) ;
-    GetEveManager()->FullRedraw3D() ;
+    GetEveManager()->EnableRedraw();
+    GetEveManager()->DoRedraw3D();
   }
 
 }
