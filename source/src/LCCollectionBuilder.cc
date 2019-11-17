@@ -3,7 +3,6 @@
 #include <LCEve/EventDisplay.h>
 #include <LCEve/Geometry.h>
 
-#include <TParticle.h>
 #include <TRandom.h>
 #include <ROOT/REveScene.hxx>
 #include <ROOT/REveJetCone.hxx>
@@ -193,7 +192,7 @@ namespace lceve {
         if( not particle->getClusters().empty() ) {
           VisualizeClusters( particle->getClusters(), "Clusters", eveParticle, colIter ) ;
         }
-        // TODO add vertex collection drawing 
+        // TODO add vertex collection drawing
         eveParticleList->AddElement( eveParticle ) ;
       }
       index++ ;
