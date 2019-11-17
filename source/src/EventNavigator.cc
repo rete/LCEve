@@ -57,7 +57,6 @@ namespace lceve {
       }
       return false ;
     } ) ;
-    _lcReader->setReadCollectionNames( _eventDisplay->GetSettings().GetReadCollectionNames() ) ;
   }
 
   //--------------------------------------------------------------------------
