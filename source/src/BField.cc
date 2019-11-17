@@ -7,6 +7,7 @@
 // --  dd4hep headers
 #include <DD4hep/Detector.h>
 #include <DD4hep/Fields.h>
+#include <DD4hep/DD4hepUnits.h>
 
 namespace lceve {
 
@@ -27,7 +28,7 @@ namespace lceve {
     double pos[] = {static_cast<double>(x), static_cast<double>(y), static_cast<double>(z)} ;
     double bfield[3] = {0} ;
     _eventDisplay->GetGeometry()->GetDetector().field().magneticField(pos, bfield) ;
-    return REX::REveVector( bfield ) ;
+    return REX::REveVector( bfield[0] / dd4hep::tesla, bfield[1] / dd4hep::tesla, bfield[2] / dd4hep::tesla ) ;
   }
 
   //--------------------------------------------------------------------------
