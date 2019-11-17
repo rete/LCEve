@@ -73,6 +73,12 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
+  REX::REveMagField *Geometry::GetBField() const {
+    return _bfield ;
+  }
+
+  //--------------------------------------------------------------------------
+
   const dd4hep::rec::LayeredCalorimeterData *Geometry::GetLayeredCaloData(unsigned int includeFlag, unsigned int excludeFlag ) const {
     dd4hep::Detector &mainDetector = dd4hep::Detector::getInstance() ;
     const auto& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors( includeFlag, excludeFlag ) ;

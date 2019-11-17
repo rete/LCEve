@@ -39,6 +39,8 @@ namespace lceve {
     /// Create a new track propagator
     REX::REveTrackPropagator *CreateTrackPropagator() const ;
     ///
+    REX::REveMagField *GetBField() const ;
+    ///
     const dd4hep::rec::LayeredCalorimeterData *GetLayeredCaloData(unsigned int includeFlag, unsigned int excludeFlag = 0) const ;
 
 
