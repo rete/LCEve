@@ -1,3 +1,5 @@
+#pragma once
+
 #include <ROOT/REveManager.hxx>
 #include <ROOT/REveElement.hxx>
 #include <TApplication.h>

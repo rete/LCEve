@@ -1,3 +1,4 @@
+#pragma once
 
 // -- root headers
 #include <ROOT/REveElement.hxx>
