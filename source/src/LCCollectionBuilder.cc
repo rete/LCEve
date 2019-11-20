@@ -12,6 +12,14 @@
 #include <LCEve/DrawAttributes.h>
 
 namespace lceve {
+  
+  template <typename T>
+  inline std::string FormatReal( const T &val ) {
+    std::stringstream sstr ;
+    sstr << std::scientific << (val >= 0. ? "+" : "") << val ;
+    return sstr.str() ; 
+  }
+  
 
   LCCollectionConverter::LCCollectionConverter( EventDisplay *lced ) :
     _eventDisplay(lced) {
@@ -63,10 +71,18 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  void LCCollectionConverter::VisualizeTracks( const std::vector<EVENT::Track*> &tracks,
+  void LCCollectionConverter::VisualizeTracks( const std::vector<EVENT::Track*> &itracks,
     const std::string &name,
     REX::REveElement *parent,
     ColorIterator &colorIter) {
+    
+    // get a copy and sort by momentum
+    auto tracks = itracks ;
+    std::sort( tracks.begin(), tracks.end(), [this](auto lhs, auto rhs){
+      auto lhsMomentum = ComputeMomentum( lhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
+      auto rhsMomentum = ComputeMomentum( rhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
+      return ( rhsMomentum.Mag() < lhsMomentum.Mag() ) ;
+    } ) ;
 
     auto barrelData = _eventDisplay->GetGeometry()->GetLayeredCaloData(
       ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
@@ -82,38 +98,68 @@ namespace lceve {
 
     REX::REveElement *eveTrackList = new REX::REveElement( name ) ;
     eveTrackList->SetMainColor(kTeal);
-
-    double bfieldV[3] ;
-    _eventDisplay->GetGeometry()->GetDetector().field().magneticField( { 0., 0., 0. }  , bfieldV  ) ;
-    const double bfield = bfieldV[2]/dd4hep::tesla ;
     unsigned index = 0 ;
 
     for( auto lcTrack : tracks ) {
+      
       const auto *startTrackState = lcTrack->getTrackState( EVENT::TrackState::AtFirstHit ) ;
       const auto startPoint = startTrackState->getReferencePoint() ;
-      const double omega = startTrackState->getOmega() ;
-      const double pt(bfield* 2.99792e-4 / std::fabs(omega));
-      const double px(pt * std::cos(startTrackState->getPhi()));
-      const double py(pt * std::sin(startTrackState->getPhi()));
-      const double pz(pt * startTrackState->getTanLambda());
+      auto momentumAtStart = ComputeMomentum( startTrackState ) ;
 
-      auto trackInfo = new REX::REveRecTrack() ;
-      trackInfo->fV.Set( startPoint[0]*0.1, startPoint[1]*0.1, startPoint[2]*0.1 ) ;
-      trackInfo->fP.Set( px, py, pz ) ;
-      trackInfo->fSign = 0 ;
-      if (std::numeric_limits<float>::epsilon() < std::fabs(omega)) {
-        trackInfo->fSign = static_cast<int>(omega / std::fabs(omega));
+      REX::REveRecTrack trackInfo;
+      trackInfo.fV.Set( startPoint[0]*0.1, startPoint[1]*0.1, startPoint[2]*0.1 ) ;
+      trackInfo.fP = momentumAtStart ;
+      trackInfo.fSign = 0 ;
+      if (std::numeric_limits<float>::epsilon() < std::fabs(startTrackState->getOmega())) {
+        trackInfo.fSign = static_cast<int>(startTrackState->getOmega() / std::fabs(startTrackState->getOmega()));
       }
+      
+      REX::REvePathMark endPositionMark(REX::REvePathMark::kReference);
+      const auto *endTrackState = lcTrack->getTrackState( EVENT::TrackState::AtLastHit ) ;
+      const auto positionAtEnd = endTrackState->getReferencePoint() ;
+      const auto momentumAtEnd = ComputeMomentum( endTrackState ) ;
+      endPositionMark.fV.Set(positionAtEnd[0]*0.1, positionAtEnd[1]*0.1, positionAtEnd[2]*0.1);
+      endPositionMark.fP = momentumAtEnd ;
+      
+      REX::REvePathMark caloPositionMark(REX::REvePathMark::kDecay);
+      const auto *caloTrackState = lcTrack->getTrackState( EVENT::TrackState::AtCalorimeter ) ;
+      const auto positionAtCalo = caloTrackState->getReferencePoint() ;
+      caloPositionMark.fV.Set(positionAtCalo[0]*0.1, positionAtCalo[1]*0.1, positionAtCalo[2]*0.1);
 
-      auto eveTrack = new REX::REveTrack( trackInfo, prop ) ;
+      std::stringstream trkName ;
+      trkName << "Track p=" << momentumAtStart.Mag() << " GeV";
+      std::stringstream trkTitle ;
+      trkTitle << std::string(30, '-') << " Track " << std::string(30, '-') << "\n" ;
+      trkTitle << "Momentum                                            " << FormatReal(momentumAtStart.Mag()) << " GeV\n"
+               << "Charge                                              " << trackInfo.fSign << "\n"
+               << "Type                                                " << lcTrack->getType() << "\n"
+               << "dE/dX                                               " << FormatReal(lcTrack->getdEdx()) << "\n"
+               << "dE/dX error                                         " << FormatReal(lcTrack->getdEdxError()) << "\n"
+               << "Chi2                                                " << FormatReal(lcTrack->getChi2()) << "\n" 
+               << "Ndf                                                 " << lcTrack->getNdf() << "\n" ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtOther) ) ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtIP) ) ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtFirstHit) ) ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtLastHit) ) ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtCalorimeter) ) ;
+      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtVertex) ) ;
+
+      auto eveTrack = new REX::REveTrack( &trackInfo, prop ) ;
       eveTrack->MakeTrack() ;
-      eveTrack->SetName( Form("Track %d", index) ) ;
-      eveTrack->SetStdTitle() ;
+      eveTrack->AddPathMark(endPositionMark);
+      eveTrack->AddPathMark(caloPositionMark);
+      // FIXME: The title is not display as tooltip, 
+      // so here I set the name as the title to display the tooltip correctly.
+      // When this is fixed we should switch back to SetName( trkName.str() ) ;
+      // eveTrack->SetName( trkName.str() ) ;
+      eveTrack->SetName( trkTitle.str() ) ;
+      eveTrack->SetTitle( trkTitle.str() ) ;
       eveTrack->SetMainColor( colorIter.NextColor() ) ;
       eveTrack->SetLineWidth(2);
       eveTrack->SetPickable(true);
 
       eveTrackList->AddElement( eveTrack ) ;
+      index++ ;
     }
     parent->AddElement( eveTrackList ) ;
     index++ ;
@@ -141,17 +187,50 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  void LCCollectionConverter::VisualizeClusters( const std::vector<EVENT::Cluster*> &clusters,
+  void LCCollectionConverter::VisualizeClusters( const std::vector<EVENT::Cluster*> &iclusters,
     const std::string &name,
     REX::REveElement *parent,
     ColorIterator &colorIter ) {
-
+    
+    auto clusters = iclusters ;
+    std::sort( clusters.begin(), clusters.end(), [](auto lhs, auto rhs){
+      return ( lhs->getEnergy() < rhs->getEnergy() ) ;
+    } ) ;
     auto eveClusterList = new REX::REveElement( name ) ;
     unsigned index = 0 ;
     for( auto cluster : clusters ) {
-      auto eveCluster = new REX::REveElement( Form( "Cluster %d", index ) ) ;
+      auto eveCluster = new REX::REvePointSet() ;
+      eveCluster->SetMarkerColor( colorIter.NextColor() ) ;
+      eveCluster->SetMarkerSize( 3 ) ;
+      eveCluster->SetMarkerStyle( 4 ) ;
+      auto &caloHits = cluster->getCalorimeterHits() ;
+      for( auto caloHit : caloHits ) {
+        auto p = caloHit->getPosition() ;
+        eveCluster->SetNextPoint( p[0]*0.1, p[1]*0.1, p[2]*0.1 ) ;
+      }
       eveClusterList->AddElement( eveCluster ) ;
-      VisualizeCaloHits( cluster->getCalorimeterHits(), "CaloHits", eveCluster, colorIter ) ;
+      
+      std::stringstream clusterName ;
+      clusterName << "Cluster E=" << FormatReal(cluster->getEnergy()) << " GeV" ;
+      
+      std::stringstream clusterTitle ;
+      clusterTitle << std::string(29, '-') << " Cluster " << std::string(29, '-') << "\n" ;
+      clusterTitle << "Energy                                               " << FormatReal(cluster->getEnergy()) << " GeV\n"
+                   << "Energy error                                         " << FormatReal(cluster->getEnergyError()) << " GeV\n"
+                   << "Position               " << FormatReal(cluster->getPosition()[0]) << " ," 
+                                                << FormatReal(cluster->getPosition()[1]) << " ,"
+                                                << FormatReal(cluster->getPosition()[2]) << "\n" 
+                   << "Position error         " << FormatReal(cluster->getPositionError()[0]) << " ," 
+                                                << FormatReal(cluster->getPositionError()[1]) << " ,"
+                                                << FormatReal(cluster->getPositionError()[2]) << "\n"
+                   << "NHits                                                " << cluster->getCalorimeterHits().size() << "\n"
+                   << "IPhi                                                 " << FormatReal(cluster->getIPhi()) << "\n"
+                   << "ITheta                                               " << FormatReal(cluster->getITheta()) << "\n" ;
+      auto &pids = cluster->getParticleIDs() ;
+      clusterTitle << GetParticleIDsDescription( pids ) ;
+      // eveCluster->SetName( clusterName.str() ) ;
+      eveCluster->SetName( clusterTitle.str() ) ;
+      eveCluster->SetTitle( clusterTitle.str() ) ;
       index++ ;
     }
     parent->AddElement( eveClusterList ) ;
@@ -187,11 +266,15 @@ namespace lceve {
         auto eveParticle = new REX::REveElement( Form( "Particle %d", index) ) ;
         ColorIterator colIter( ColorIterStrategy::FIXED_COLOR, color ) ;
         if( not particle->getTracks().empty() ) {
-          VisualizeTracks( particle->getTracks(), "Tracks", eveParticle, colIter ) ;
+          VisualizeTracks( particle->getTracks(), Form("Tracks (%d)",(int)particle->getTracks().size()), eveParticle, colIter ) ;
         }
         if( not particle->getClusters().empty() ) {
-          VisualizeClusters( particle->getClusters(), "Clusters", eveParticle, colIter ) ;
+          VisualizeClusters( particle->getClusters(), Form("Clusters (%d)", (int)particle->getClusters().size()), eveParticle, colIter ) ;
         }
+        std::stringstream particleTitle ;
+        particleTitle << GetParticleIDsDescription( particle->getParticleIDs() ) ;
+        eveParticle->SetName( particleTitle.str() ) ;
+        eveParticle->SetTitle( particleTitle.str() ) ;
         // TODO add vertex collection drawing
         eveParticleList->AddElement( eveParticle ) ;
       }
@@ -202,37 +285,73 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  // void LCCollectionConverter::LoadDummyData( REX::REveScene *scene ) {
-  //
-  //   TRandom &r = *gRandom;
-  //   auto prop = new REX::REveTrackPropagator();
-  //   prop->SetMagFieldObj(new REX::REveMagFieldDuo(350, -3.5, 2.0));
-  //   prop->SetMaxR(300);
-  //   prop->SetMaxZ(600);
-  //   prop->SetMaxOrbs(6);
-  //
-  //   auto trackHolder = new REX::REveElement("Tracks");
-  //
-  //   double v = 0.2;
-  //   double m = 5;
-  //
-  //   int N_Tracks = 10 + r.Integer(20);
-  //   for (int i = 0; i < N_Tracks; i++)
-  //   {
-  //     TParticle* p = new TParticle();
-  //
-  //     int pdg = 11* (r.Integer(2) -1);
-  //     p->SetPdgCode(pdg);
-  //
-  //     p->SetProductionVertex(r.Uniform(-v,v), r.Uniform(-v,v), r.Uniform(-v,v), 1);
-  //     p->SetMomentum(r.Uniform(-m,m), r.Uniform(-m,m), r.Uniform(-m,m)*r.Uniform(1, 3), 1);
-  //     auto track = new REX::REveTrack(p, 1, prop);
-  //     track->MakeTrack();
-  //     track->SetMainColor(kBlue);
-  //     track->SetName(Form("RandomTrack_%d", i));
-  //     trackHolder->AddElement(track);
-  //  }
-  //  scene->AddElement(trackHolder);
-  // }
+  std::string LCCollectionConverter::GetTrackStateDescription( const EVENT::TrackState *const trkState ) const {
+    if( nullptr == trkState ) {
+      return "" ;
+    }
+    std::stringstream description ;
+    auto locationStr = GetTrackStateLocationAsString(trkState) ;
+    description << "------------------------ Track state: " << locationStr << " " << std::string(28 - locationStr.size(), '-') << "\n"
+                << "D0                                                  " << FormatReal(trkState->getD0()) << "\n"
+                << "Phi                                                 " << FormatReal(trkState->getPhi()) << "\n"
+                << "Omega                                               " << FormatReal(trkState->getOmega()) << "\n"
+                << "Z0                                                  " << FormatReal(trkState->getZ0()) << "\n"
+                << "TanLambda                                           " << FormatReal(trkState->getTanLambda()) << "\n"
+                << "Reference point       " << FormatReal(trkState->getReferencePoint()[0]) << ", " 
+                                            << FormatReal(trkState->getReferencePoint()[1]) << ", "
+                                            << FormatReal(trkState->getReferencePoint()[2]) << "\n";
+    return description.str() ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  std::string LCCollectionConverter::GetTrackStateLocationAsString( const EVENT::TrackState *const trkState ) const {
+    const int location = trkState->getLocation() ;
+    switch( location ) {
+      case EVENT::TrackState::AtOther:
+        return "AtOther" ;
+      case EVENT::TrackState::AtIP:
+        return "AtIP" ;
+      case EVENT::TrackState::AtFirstHit:
+        return "AtFirstHit" ;
+      case EVENT::TrackState::AtLastHit:
+        return "AtLastHit" ;
+      case EVENT::TrackState::AtCalorimeter:
+        return "AtCalorimeter" ;
+      case EVENT::TrackState::AtVertex:
+        return "AtVertex" ;
+      default:
+        return "Unknown" ;
+    }
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  std::string LCCollectionConverter::GetParticleIDsDescription( const std::vector<EVENT::ParticleID*> &pids ) const {
+    if( pids.empty() ) {
+      return "" ;
+    }
+    std::stringstream sstr ;
+    sstr << "------------------------ Particle IDs ------------------------\n" ;
+    for( auto pid : pids ) {
+      sstr << "----- Algorithm                " << pid->getAlgorithmType() << "\n"
+           << "Type                                                " << pid->getType() << "\n"
+           << "PDG                                                 " << pid->getPDG() << "\n"
+           << "Likelihood                                          " << pid->getLikelihood() << "\n" ;
+      auto &params = pid->getParameters() ;
+      if( not params.empty() ) {
+        sstr << "Parameters";
+                // "                      "
+        for( unsigned int i=0 ; i<params.size() ; i++ ) {
+          if( i%3 ) {
+            sstr << "\n                      ";
+          }
+          sstr << params[i] << "  ";
+        }
+        sstr << "\n";
+      }
+    }
+    return sstr.str() ;     
+  }
 
 }
