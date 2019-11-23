@@ -36,6 +36,9 @@ namespace lceve {
     bool GeometryLoaded() const ;
     /// Get the dd4hep detector instance
     const dd4hep::Detector &GetDetector() const ;
+    /// Get the detector name. Valid only after reading the geometry
+    const std::string &GetDetectorName() const ;
+
     /// Create a new track propagator
     REX::REveTrackPropagator *CreateTrackPropagator() const ;
     ///
@@ -52,10 +55,13 @@ namespace lceve {
 
     void LoadGeometry( dd4hep::Detector &detector ) ;
 
+    std::string ExtractDetectorName( const std::string &compactFile ) const ;
+
   private:
     bool                              _loaded {false} ;
     EventDisplay                     *_eventDisplay {nullptr} ;
     REX::REveMagField                *_bfield {nullptr} ;
+    std::string                       _detectorName {"Unknown"} ;
   };
 
 }

@@ -22,6 +22,7 @@ namespace REX = ROOT::Experimental ;
 #include <DD4hep/Objects.h>
 #include <DD4hep/DetElement.h>
 #include <DD4hep/Volumes.h>
+#include <XML/DocumentHandler.h>
 
 namespace lceve {
 
@@ -45,6 +46,8 @@ namespace lceve {
     }
     dd4hep::Detector& theDetector = dd4hep::Detector::getInstance() ;
     theDetector.fromCompact( compactFile ) ;
+    _detectorName = ExtractDetectorName( compactFile ) ;
+    std::cout << "Detector name: "<< _detectorName << std::endl ;
     std::cout << "Loading geometry in Eve. Please be patient..." << std::endl ;
     LoadGeometry( theDetector ) ;
     std::cout << "Loading geometry: done!" << std::endl ;
@@ -61,6 +64,12 @@ namespace lceve {
 
   const dd4hep::Detector &Geometry::GetDetector() const {
     return dd4hep::Detector::getInstance() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  const std::string &Geometry::GetDetectorName() const {
+    return _detectorName ;
   }
 
   //--------------------------------------------------------------------------
@@ -211,6 +220,33 @@ namespace lceve {
         }
       }
     }
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::string Geometry::ExtractDetectorName( const std::string &compactFile ) const {
+    std::string detectorName = compactFile ;
+    auto last = detectorName.rfind( "/" ) ;
+    if( last != std::string::npos ) {
+      detectorName = detectorName.substr( last+1 ) ;
+    }
+    last = detectorName.rfind( "." ) ;
+    if( last != std::string::npos ) {
+      detectorName = detectorName.substr( 0, last ) ;
+    }
+    try {
+      dd4hep::xml::DocumentHandler handler;
+      auto doc = handler.load( compactFile ).root() ;
+      if( doc.hasChild("info") ) {
+        auto info = doc.child("info") ;
+        if( info.hasAttr("name") ) {
+          detectorName = info.attr_value( "name" ) ;
+          std::cout << "From compact file root/info attr name: " << detectorName << std::endl ;
+        }
+      }
+    }
+    catch(...) {}
+    return detectorName ;
   }
 
 }
