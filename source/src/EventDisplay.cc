@@ -4,6 +4,7 @@
 #include <LCEve/EventNavigator.h>
 #include <LCEve/LCCollectionBuilder.h>
 #include <LCEve/Geometry.h>
+#include <LCEve/LCEveConfig.h>
 
 // -- tclap headers
 #include <tclap/CmdLine.h>
@@ -117,7 +118,6 @@ namespace lceve {
     /// Create the Eve manager
     _eveManager = REX::REveManager::Create() ;
     _eveManager->GetWorld()->AddElement( this ) ;
-    _eveManager->GetWorld()->AddCommand( "QuitRoot", "sap-icon://log", this, "QuitRoot()" ) ;
 
     /// Load the DD4hep compact file
     _geometry->LoadCompactFile( compactFileArg.getValue() ) ;
@@ -127,6 +127,11 @@ namespace lceve {
     if( lcioFilesArg.isSet() ) {
       _navigator->Open( lcioFilesArg.getValue() ) ;
     }
+
+    // Initialize OpenUI custom scripts
+    auto ui5Dir = std::string(LCEVE_DIR) + "/ui5" ;
+    GetEveManager()->AddLocation("lceve/", ui5Dir) ;
+    GetEveManager()->SetDefaultHtmlPage("file:lceve/lceve.html") ;
   }
 
   //--------------------------------------------------------------------------
@@ -143,6 +148,7 @@ namespace lceve {
 
   void EventDisplay::QuitRoot() {
     if( GetApplication() ) {
+      std::cout << "Exiting application..." << std::endl ;
       GetApplication()->Terminate() ;
     }
   }
