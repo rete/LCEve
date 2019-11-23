@@ -7,7 +7,7 @@ cmake_minimum_required(VERSION 3.14 FATAL_ERROR)
 # project !
 project(
   LCEve
-  VERSION 0.0.0
+  VERSION 1.0.0
   LANGUAGES CXX
 )
 
@@ -53,6 +53,15 @@ foreach( include_dir ${ROOT_INCLUDE_DIRS} )
   endforeach()
 endforeach()
 
+#--- Generate LCEveConfig.h
+string( TIMESTAMP LCEve_RELEASE_DATE "%b %d %Y" )
+string( TIMESTAMP LCEve_RELEASE_TIME "%H:%M:%S" )
+configure_file(
+  ${PROJECT_SOURCE_DIR}/cmake/LCEveConfig.h.cmake.in
+  ${PROJECT_SOURCE_DIR}/source/include/LCEve/LCEveConfig.h
+  @ONLY
+)
+
 include_directories( source/include )
 
 #
@@ -83,6 +92,11 @@ add_executable( LCGeomViewer_bin source/main/LCGeomViewer.cc )
 target_link_libraries( LCGeomViewer_bin LCEve_lib )
 set_target_properties( LCGeomViewer_bin PROPERTIES OUTPUT_NAME LCGeomViewer )
 install( TARGETS LCGeomViewer_bin RUNTIME )
+
+# Install OpenUI scripts
+if( NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "${PROJECT_SOURCE_DIR}" )
+  install( DIRECTORY ui5 DESTINATION . )
+endif()
 
 # display some variables and write them to cache
 display_std_variables()
