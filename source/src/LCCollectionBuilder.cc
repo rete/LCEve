@@ -12,14 +12,14 @@
 #include <LCEve/DrawAttributes.h>
 
 namespace lceve {
-  
+
   template <typename T>
   inline std::string FormatReal( const T &val ) {
     std::stringstream sstr ;
     sstr << std::scientific << (val >= 0. ? "+" : "") << val ;
-    return sstr.str() ; 
+    return sstr.str() ;
   }
-  
+
 
   LCCollectionConverter::LCCollectionConverter( EventDisplay *lced ) :
     _eventDisplay(lced) {
@@ -75,12 +75,12 @@ namespace lceve {
     const std::string &name,
     REX::REveElement *parent,
     ColorIterator &colorIter) {
-    
+
     // get a copy and sort by momentum
     auto tracks = itracks ;
     std::sort( tracks.begin(), tracks.end(), [this](auto lhs, auto rhs){
-      auto lhsMomentum = ComputeMomentum( lhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
-      auto rhsMomentum = ComputeMomentum( rhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
+      auto lhsMomentum = this->ComputeMomentum( lhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
+      auto rhsMomentum = this->ComputeMomentum( rhs->getTrackState( EVENT::TrackState::AtFirstHit ) ) ;
       return ( rhsMomentum.Mag() < lhsMomentum.Mag() ) ;
     } ) ;
 
@@ -101,7 +101,7 @@ namespace lceve {
     unsigned index = 0 ;
 
     for( auto lcTrack : tracks ) {
-      
+
       const auto *startTrackState = lcTrack->getTrackState( EVENT::TrackState::AtFirstHit ) ;
       const auto startPoint = startTrackState->getReferencePoint() ;
       auto momentumAtStart = ComputeMomentum( startTrackState ) ;
@@ -113,14 +113,14 @@ namespace lceve {
       if (std::numeric_limits<float>::epsilon() < std::fabs(startTrackState->getOmega())) {
         trackInfo.fSign = static_cast<int>(startTrackState->getOmega() / std::fabs(startTrackState->getOmega()));
       }
-      
+
       REX::REvePathMark endPositionMark(REX::REvePathMark::kReference);
       const auto *endTrackState = lcTrack->getTrackState( EVENT::TrackState::AtLastHit ) ;
       const auto positionAtEnd = endTrackState->getReferencePoint() ;
       const auto momentumAtEnd = ComputeMomentum( endTrackState ) ;
       endPositionMark.fV.Set(positionAtEnd[0]*0.1, positionAtEnd[1]*0.1, positionAtEnd[2]*0.1);
       endPositionMark.fP = momentumAtEnd ;
-      
+
       REX::REvePathMark caloPositionMark(REX::REvePathMark::kDecay);
       const auto *caloTrackState = lcTrack->getTrackState( EVENT::TrackState::AtCalorimeter ) ;
       const auto positionAtCalo = caloTrackState->getReferencePoint() ;
@@ -135,7 +135,7 @@ namespace lceve {
                << "Type                                                " << lcTrack->getType() << "\n"
                << "dE/dX                                               " << FormatReal(lcTrack->getdEdx()) << "\n"
                << "dE/dX error                                         " << FormatReal(lcTrack->getdEdxError()) << "\n"
-               << "Chi2                                                " << FormatReal(lcTrack->getChi2()) << "\n" 
+               << "Chi2                                                " << FormatReal(lcTrack->getChi2()) << "\n"
                << "Ndf                                                 " << lcTrack->getNdf() << "\n" ;
       trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtOther) ) ;
       trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtIP) ) ;
@@ -148,7 +148,7 @@ namespace lceve {
       eveTrack->MakeTrack() ;
       eveTrack->AddPathMark(endPositionMark);
       eveTrack->AddPathMark(caloPositionMark);
-      // FIXME: The title is not display as tooltip, 
+      // FIXME: The title is not display as tooltip,
       // so here I set the name as the title to display the tooltip correctly.
       // When this is fixed we should switch back to SetName( trkName.str() ) ;
       // eveTrack->SetName( trkName.str() ) ;
@@ -191,7 +191,7 @@ namespace lceve {
     const std::string &name,
     REX::REveElement *parent,
     ColorIterator &colorIter ) {
-    
+
     auto clusters = iclusters ;
     std::sort( clusters.begin(), clusters.end(), [](auto lhs, auto rhs){
       return ( lhs->getEnergy() < rhs->getEnergy() ) ;
@@ -209,18 +209,18 @@ namespace lceve {
         eveCluster->SetNextPoint( p[0]*0.1, p[1]*0.1, p[2]*0.1 ) ;
       }
       eveClusterList->AddElement( eveCluster ) ;
-      
+
       std::stringstream clusterName ;
       clusterName << "Cluster E=" << FormatReal(cluster->getEnergy()) << " GeV" ;
-      
+
       std::stringstream clusterTitle ;
       clusterTitle << std::string(29, '-') << " Cluster " << std::string(29, '-') << "\n" ;
       clusterTitle << "Energy                                               " << FormatReal(cluster->getEnergy()) << " GeV\n"
                    << "Energy error                                         " << FormatReal(cluster->getEnergyError()) << " GeV\n"
-                   << "Position               " << FormatReal(cluster->getPosition()[0]) << " ," 
+                   << "Position               " << FormatReal(cluster->getPosition()[0]) << " ,"
                                                 << FormatReal(cluster->getPosition()[1]) << " ,"
-                                                << FormatReal(cluster->getPosition()[2]) << "\n" 
-                   << "Position error         " << FormatReal(cluster->getPositionError()[0]) << " ," 
+                                                << FormatReal(cluster->getPosition()[2]) << "\n"
+                   << "Position error         " << FormatReal(cluster->getPositionError()[0]) << " ,"
                                                 << FormatReal(cluster->getPositionError()[1]) << " ,"
                                                 << FormatReal(cluster->getPositionError()[2]) << "\n"
                    << "NHits                                                " << cluster->getCalorimeterHits().size() << "\n"
@@ -297,14 +297,14 @@ namespace lceve {
                 << "Omega                                               " << FormatReal(trkState->getOmega()) << "\n"
                 << "Z0                                                  " << FormatReal(trkState->getZ0()) << "\n"
                 << "TanLambda                                           " << FormatReal(trkState->getTanLambda()) << "\n"
-                << "Reference point       " << FormatReal(trkState->getReferencePoint()[0]) << ", " 
+                << "Reference point       " << FormatReal(trkState->getReferencePoint()[0]) << ", "
                                             << FormatReal(trkState->getReferencePoint()[1]) << ", "
                                             << FormatReal(trkState->getReferencePoint()[2]) << "\n";
     return description.str() ;
   }
-  
+
   //--------------------------------------------------------------------------
-  
+
   std::string LCCollectionConverter::GetTrackStateLocationAsString( const EVENT::TrackState *const trkState ) const {
     const int location = trkState->getLocation() ;
     switch( location ) {
@@ -324,9 +324,9 @@ namespace lceve {
         return "Unknown" ;
     }
   }
-  
+
   //--------------------------------------------------------------------------
-  
+
   std::string LCCollectionConverter::GetParticleIDsDescription( const std::vector<EVENT::ParticleID*> &pids ) const {
     if( pids.empty() ) {
       return "" ;
@@ -351,7 +351,7 @@ namespace lceve {
         sstr << "\n";
       }
     }
-    return sstr.str() ;     
+    return sstr.str() ;
   }
 
 }
