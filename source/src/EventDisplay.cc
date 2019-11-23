@@ -90,6 +90,10 @@ namespace lceve {
       "Whether to display LCIO event in DST mode. Draw only reconstructed quantities with dedicated display", false) ;
     cmd.add( dstModeArg ) ;
 
+    TCLAP::ValueArg<int> portArg( "p", "port",
+      "The http port to use", false, 0, "int") ;
+    cmd.add( portArg ) ;
+
     TCLAP::ValueArg<int> detectorLevelArg( "l", "detector-level",
       "The detector depth level to load", false, 1, "int") ;
     cmd.add( detectorLevelArg ) ;
@@ -103,6 +107,9 @@ namespace lceve {
     _settings.SetServerMode( serverModeArg.getValue() ) ;
     _settings.SetDSTMode( dstModeArg.getValue() ) ;
     _settings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
+    if( portArg.isSet() ) {
+      gEnv->SetValue( "WebGui.HttpPort", portArg.getValue() ) ;
+    }
 
     // Create the ROOT application running the event loop
     _application = new TApplication( "LCEve application", nullptr, nullptr ) ;
