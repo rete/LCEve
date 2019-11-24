@@ -1,5 +1,7 @@
 #pragma once
 
+#include <Rtypes.h>
+
 /// Nice header to deal with ROOT class definitions.
 /// We might remove the Experimental namespace one day...
 
@@ -17,8 +19,11 @@ namespace ROOT {
     class REveJetCone ;
     template <typename TT>
     class REveRecTrackT ;
-    class REvePathMark ;
+    template <typename TT>
+    class REvePathMarkT ;
     class REvePointSet ;
+    class REveBoxSet ;
+    class REveEllipsoid ;
   }
   // Import Experimental namespace in ROOT namespace,
   // not in global namespace
