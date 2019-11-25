@@ -1913,8 +1913,8 @@ class basic_json
 
     @since version 1.0.0
     */
-    basic_json(const value_t value_type)
-        : m_type(value_type), m_value(value_type)
+    basic_json(const value_t value_typ)
+        : m_type(value_typ), m_value(value_typ)
     {
         assert_invariant();
     }
