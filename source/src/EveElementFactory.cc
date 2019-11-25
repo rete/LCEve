@@ -1,9 +1,14 @@
 
 #include <LCEve/EveElementFactory.h>
 
+// -- ROOT headers
 #include <ROOT/REveVector.hxx>
 #include <ROOT/REveTrack.hxx>
 #include <ROOT/REveVSDStructs.hxx>
+#include <ROOT/REveEllipsoid.hxx>
+#include <TMatrixDEigen.h>
+#include <TMatrixDSym.h>
+#include <TVectorD.h>
 
 namespace lceve {
 
@@ -73,9 +78,47 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveEllipsoid *EveElementFactory::CreateVertex( const VertexParameters &/*parameters*/ ) const {
-#pragma message "TODO: Implement Eve vertex factory method"
-    return nullptr ;
+  ROOT::REveEllipsoid *EveElementFactory::CreateVertex( const VertexParameters &parameters ) const {
+    auto eveVertex = new ROOT::REveEllipsoid() ;
+    std::stringstream vertexName ;
+    auto position = parameters.fPosition.value() ;
+    vertexName << "Vertex (" << position[0] << ", " << position[1] << ", " << position[2] << ")" ;
+    eveVertex->SetName( vertexName.str() ) ;
+#pragma message "Implement eve vertex title"
+    // set vertex position
+    eveVertex->RefMainTrans().SetPos( parameters.fPosition.value().Arr() ) ;
+    // Set line attributes
+    if( parameters.fLineAttributes ) {
+      if( parameters.fLineAttributes.value().fWidth ) {
+        eveVertex->SetLineWidth( parameters.fLineAttributes.value().fWidth.value() ) ;
+      }    
+      if( parameters.fLineAttributes.value().fWidth ) {
+        eveVertex->SetLineWidth( parameters.fLineAttributes.value().fWidth.value() ) ;
+      }
+      if( parameters.fLineAttributes.value().fStyle ) {
+        eveVertex->SetLineStyle( parameters.fLineAttributes.value().fStyle.value() ) ;
+      }      
+    }
+    // Calculate vertex extent using vertex errors
+    // The 6 parameters of a symetric matrix 
+    auto errors = parameters.fErrors.value() ;
+    TMatrixDSym xxx(3) ;
+    xxx(0, 0) = errors[0] ;
+    xxx(1, 0) = errors[1] ; xxx(1, 1) = errors[2] ;
+    xxx(2, 0) = errors[3] ; xxx(2, 1) = errors[4] ; xxx(2, 2) = errors[5] ;
+    // Get eigen vectors
+    TMatrixDEigen eig(xxx);
+    TVectorD eigenValues = TVectorD( eig.GetEigenValues() ).Sqrt() ;
+    TMatrixD eigenVectors = eig.GetEigenVectors();
+    ROOT::REveVector baseVectors[3];
+    for (int i = 0; i < 3; ++i) {
+       baseVectors[i].Set(eigenVectors(0,i), eigenVectors(1,i), eigenVectors(2,i));
+#pragma message "FIXME: Find a way to tune the eve vertex extent factor"
+       baseVectors[i] *=  eigenValues(i)*500 ;
+    }
+    eveVertex->SetBaseVectors( baseVectors[0], baseVectors[1], baseVectors[2] ) ;
+    eveVertex->Outline();
+    return eveVertex ;
   }
 
   //--------------------------------------------------------------------------
