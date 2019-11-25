@@ -73,32 +73,37 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveEllipsoid *EveElementFactory::CreateVertex( const VertexParameters &parameters ) const {
-
+  ROOT::REveEllipsoid *EveElementFactory::CreateVertex( const VertexParameters &/*parameters*/ ) const {
+#pragma message "TODO: Implement Eve vertex factory method"
+    return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REvePointSet *EveElementFactory::CreateCalorimeterHits( const CaloHitParameters &parameters ) const {
-
+  ROOT::REvePointSet *EveElementFactory::CreateCalorimeterHits( const CaloHitParameters &/*parameters*/ ) const {
+#pragma message "TODO: Implement Eve vertex factory method"
+    return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveElement *EveElementFactory::CreateCluster( const ClusterParameters &parameters ) const {
-
+  ROOT::REveElement *EveElementFactory::CreateCluster( const ClusterParameters &/*parameters*/ ) const {
+#pragma message "TODO: Implement Eve cluster factory method"
+    return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveElement *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &parameters ) const {
-
+  ROOT::REveElement *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &/*parameters*/ ) const {
+#pragma message "TODO: Implement Eve reco particle factory method"
+    return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveJetCone *EveElementFactory::CreateJet( const JetParameters &parameters ) const {
-
+  ROOT::REveJetCone *EveElementFactory::CreateJet( const JetParameters &/*parameters*/ ) const {
+#pragma message "TODO: Implement Eve jet factory method"
+    return nullptr ;
   }
 
 }
