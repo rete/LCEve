@@ -123,6 +123,8 @@ namespace lceve {
     std::optional<std::array<float,6>>                 fErrors {} ;
     /// The reconstructed vertex position
     std::optional<ROOT::REveVectorT<float>>            fPosition {} ;
+    /// The vertex line attributes
+    std::optional<LineAttributes>                      fLineAttributes {} ;
     /// Additional vertex properties
     PropertyMap                                        fProperties {} ;
   };
