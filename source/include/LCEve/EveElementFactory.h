@@ -21,7 +21,7 @@ namespace lceve {
     ROOT::REveEllipsoid *CreateVertex( const VertexParameters &parameters ) const ;
 
     /// Create a vertex out of vertex parameters
-    /// TODO/FIXME, Use a REveBoxSet instead of a REvePointSet
+#pragma message "FIXME, Use a REveBoxSet instead of a REvePointSet"
     ROOT::REvePointSet *CreateCalorimeterHits( const CaloHitParameters &parameters ) const ;
 
     /// Create a cluster out of cluster parameters

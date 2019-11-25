@@ -27,7 +27,7 @@ namespace lceve {
           eveTrack->SetMarkerStyle( parameters.fMarkerAttributes.value().fStyle.value() ) ;
         }
       }
-      // FIXME: Should we set this twice here ?
+#pragma message "FIXME: Settings twice the color for tracks: 1) main color, 2) line color"
       eveTrack->SetMainColor( parameters.fLineAttributes.value().fColor.value() ) ;
       eveTrack->SetLineColor( parameters.fLineAttributes.value().fColor.value() ) ;
       if( parameters.fLineAttributes.value().fWidth ) {
@@ -53,7 +53,7 @@ namespace lceve {
           trackState.fPhi.value(), trackState.fTanLambda.value() ) ;
         eveTrack->AddPathMark( eveMark );
       }
-      // FIXME: The title is not display as tooltip,
+#pragma message "FIXME: The title is not display as tooltip, the name is usd instead"
       // so here I set the name as the title to display the tooltip correctly.
       // When this is fixed we should switch back to SetName( trkName.str() ) ;
       // eveTrack->SetName( trkName.str() ) ;
