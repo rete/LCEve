@@ -140,6 +140,8 @@ namespace lceve {
     if( GetSettings().GetServerMode() ) {
       gEnv->SetValue("WebEve.DisableShow", 1) ;
     }
+#pragma message "TODO: Add a proper option on command line for clearing browser cache"
+    gEnv->SetValue("WebGui.HttpMaxAge", 0) ;
     GetEveManager()->Show() ;
     GetApplication()->Run() ;
   }
