@@ -254,10 +254,9 @@ namespace lceve {
       auto associatedParticles = particle->getParticles() ;
       auto color = colorIter.NextColor() ;
       if( not associatedParticles.empty() ) {
+#pragma message "TODO Implement proper code for converting LCIO reco particle to Eve jet object"
         auto jet = new REX::REveJetCone( Form( "Particle %d (jet)", index) ) ;
         jet->SetCylinder( barrelData->extent[1], endcapData->extent[3] ) ;
-        // TODO calculate jet cone
-
         jet->SetFillColor(color);
         jet->SetLineColor(TColor::GetColorBright(color));
         eveParticleList->AddElement( jet ) ;
@@ -275,7 +274,6 @@ namespace lceve {
         particleTitle << GetParticleIDsDescription( particle->getParticleIDs() ) ;
         eveParticle->SetName( particleTitle.str() ) ;
         eveParticle->SetTitle( particleTitle.str() ) ;
-        // TODO add vertex collection drawing
         eveParticleList->AddElement( eveParticle ) ;
       }
       index++ ;

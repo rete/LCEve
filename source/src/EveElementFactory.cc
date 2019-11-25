@@ -59,8 +59,7 @@ namespace lceve {
       // eveTrack->SetName( trkName.str() ) ;
       std::stringstream trkName ;
       trkName << "Track p=" << parameters.fStartMomentum.value().Mag() << " GeV";
-      // TODO re-write the code for the track title.
-      // For the time being, just use the name
+#pragma message "TODO: Re-write the code for generating the eve track tooltip"
       eveTrack->SetName( trkName.str() ) ;
       eveTrack->SetTitle( trkName.str() ) ;
 

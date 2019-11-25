@@ -206,6 +206,6 @@ namespace lceve {
     static ROOT::REveVectorT<float> ComputeMomentum( float bfield, float omega, float phi, float tanLambda ) ;
   };
 
-  // TODO: Added missing classes for MCParticle and TrackerHit
+#pragma message "TODO: Added missing classes for MCParticle and TrackerHit"
 
 }
