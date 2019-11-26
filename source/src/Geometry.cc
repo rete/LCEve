@@ -137,10 +137,10 @@ namespace lceve {
         element = p;
       }
       if ( !element )  {
-        element = (REX::REveGeoShape*)p->FindChild(n->GetName());
+        element = (ROOT::REveGeoShape*)p->FindChild(n->GetName());
       }
       if ( !element && !nam.empty() )  {
-        element = (REX::REveGeoShape*)p->FindChild(nam.c_str());
+        element = (ROOT::REveGeoShape*)p->FindChild(nam.c_str());
       }
       if ( element ) goto Daughters;
     }
