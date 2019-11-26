@@ -15,7 +15,6 @@
 #include <TGeoShape.h>
 #include <TGeoNode.h>
 #include <TGeoShapeAssembly.h>
-namespace REX = ROOT::Experimental ;
 
 // -- dd4hep headers
 #include <DD4hep/Detector.h>
@@ -27,37 +26,37 @@ namespace REX = ROOT::Experimental ;
 namespace lceve {
 
   Geometry::Geometry( EventDisplay *lced ) :
-    _eventDisplay(lced) {
-    _bfield = new BField(lced) ;
+    fEventDisplay(lced) {
+    fBField = new BField(lced) ;
   }
 
   //--------------------------------------------------------------------------
 
   Geometry::~Geometry() {
-    delete _bfield ;
+    delete fBField ;
   }
 
   //--------------------------------------------------------------------------
 
   void Geometry::LoadCompactFile( const std::string &compactFile ) {
     if( GeometryLoaded() ) {
-    std::cout << "WARNING: Geometry already loaded! Not loading again..." << std::endl ;
+      std::cout << "WARNING: Geometry already loaded! Not loading again..." << std::endl ;
       return ;
     }
     dd4hep::Detector& theDetector = dd4hep::Detector::getInstance() ;
     theDetector.fromCompact( compactFile ) ;
-    _detectorName = ExtractDetectorName( compactFile ) ;
-    std::cout << "Detector name: "<< _detectorName << std::endl ;
+    fDetectorName = ExtractDetectorName( compactFile ) ;
+    std::cout << "Detector name: "<< fDetectorName << std::endl ;
     std::cout << "Loading geometry in Eve. Please be patient..." << std::endl ;
     LoadGeometry( theDetector ) ;
     std::cout << "Loading geometry: done!" << std::endl ;
-    _loaded = true ;
+    fLoaded = true ;
   }
 
   //--------------------------------------------------------------------------
 
   bool Geometry::GeometryLoaded() const {
-    return _loaded ;
+    return fLoaded ;
   }
 
   //--------------------------------------------------------------------------
@@ -69,26 +68,27 @@ namespace lceve {
   //--------------------------------------------------------------------------
 
   const std::string &Geometry::GetDetectorName() const {
-    return _detectorName ;
+    return fDetectorName ;
   }
 
   //--------------------------------------------------------------------------
 
-  REX::REveTrackPropagator *Geometry::CreateTrackPropagator() const {
-    auto prop = new REX::REveTrackPropagator() ;
-    prop->SetMagFieldObj( _bfield, false ) ;
+  ROOT::REveTrackPropagator *Geometry::CreateTrackPropagator() const {
+    auto prop = new ROOT::REveTrackPropagator() ;
+    prop->SetMagFieldObj( fBField, false ) ;
     return prop ;
   }
 
   //--------------------------------------------------------------------------
 
-  REX::REveMagField *Geometry::GetBField() const {
-    return _bfield ;
+  ROOT::REveMagField *Geometry::GetBField() const {
+    return fBField ;
   }
 
   //--------------------------------------------------------------------------
 
   const dd4hep::rec::LayeredCalorimeterData *Geometry::GetLayeredCaloData(unsigned int includeFlag, unsigned int excludeFlag ) const {
+#pragma message "Move Geometry::GetLayeredCaloData method in a geometry helper class"
     dd4hep::Detector &mainDetector = dd4hep::Detector::getInstance() ;
     const auto& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors( includeFlag, excludeFlag ) ;
     if( theDetectors.size()  != 1 ) {
@@ -105,14 +105,14 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  REX::REveElement *Geometry::LoadDetElement( dd4hep::DetElement de, int levels, REX::REveElement* parent ) {
+  ROOT::REveElement *Geometry::LoadDetElement( dd4hep::DetElement de, int levels, ROOT::REveElement* parent ) {
     dd4hep::PlacedVolume pv = de.placement() ;
     if (pv.isValid()) {
       TGeoNode* n = pv.ptr() ;
       TGeoMatrix* matrix = n->GetMatrix() ;
       gGeoManager = nullptr ;
       gGeoManager = new TGeoManager() ;
-      REX::REveElement* e = CreateEveShape(0, levels, parent, n, *matrix, de.name()) ;
+      ROOT::REveElement* e = CreateEveShape(0, levels, parent, n, *matrix, de.name()) ;
       if ( e )  {
         e->SetName( de.name() ) ;
       }
@@ -123,14 +123,14 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  REX::REveElement *Geometry::CreateEveShape( int level, int max_level, REX::REveElement *p, TGeoNode *n, const TGeoHMatrix& mat, const std::string& nam ) {
+  ROOT::REveElement *Geometry::CreateEveShape( int level, int max_level, ROOT::REveElement *p, TGeoNode *n, const TGeoHMatrix& mat, const std::string& nam ) {
     TGeoVolume* vol = n ? n->GetVolume() : 0;
     if ( 0 == vol || level > max_level ) {
       return nullptr ;
     }
     dd4hep::VisAttr vis( dd4hep::Volume(vol).visAttributes() ) ;
     TGeoShape* geoShape = vol->GetShape();
-    REX::REveElement* element = 0;
+    ROOT::REveElement* element = 0;
     if ( p )   {
       TGeoNode* pn = (TGeoNode*)p->GetUserData();
       if ( pn == n )  {
@@ -145,7 +145,7 @@ namespace lceve {
       if ( element ) goto Daughters;
     }
     if ( geoShape->IsA() == TGeoShapeAssembly::Class() )  {
-      REX::REveElement* shape = new REX::REveElement( n->GetName(), n->GetName() ) ;
+      ROOT::REveElement* shape = new ROOT::REveElement( n->GetName(), n->GetName() ) ;
       shape->SetEditMainTransparency( true ) ;
       shape->SetEditMainColor( true ) ;
       shape->SetUserData(n);
@@ -161,7 +161,7 @@ namespace lceve {
       goto Daughters;
     }
     else if ( 0 == element )  {
-      REX::REveGeoShape* shape = new REX::REveGeoShape(n->GetName());
+      ROOT::REveGeoShape* shape = new ROOT::REveGeoShape(n->GetName());
       if ( vis.isValid() )  {
         float r,g,b;
         vis.rgb(r,g,b);
@@ -192,7 +192,7 @@ namespace lceve {
       TGeoHMatrix dau_mat(mat);
       TGeoMatrix* matrix = daughter->GetMatrix();
       dau_mat.Multiply(matrix);
-      REX::REveElement* dau_shape = CreateEveShape(level+1, max_level, element, daughter, dau_mat, daughter->GetName());
+      ROOT::REveElement* dau_shape = CreateEveShape(level+1, max_level, element, daughter, dau_mat, daughter->GetName());
       if ( dau_shape )  {
         element->AddElement(dau_shape);
       }
@@ -204,17 +204,17 @@ namespace lceve {
 
   void Geometry::LoadGeometry( dd4hep::Detector &detector ) {
     dd4hep::DetElement world = detector.world();
-    int levels = _eventDisplay->GetSettings().GetDetectorLevel() ;
+    int levels = fEventDisplay->GetSettings().GetDetectorLevel() ;
     const dd4hep::DetElement::Children& c = world.children();
     if ( c.size() == 0 )   {
       std::cout << "It looks like there is no Geometry loaded. No event display availible." << std::endl ;
     }
     else if ( levels > 0 ) {
-      auto parent = _eventDisplay->GetEveManager()->GetGlobalScene() ;
+      auto parent = fEventDisplay->GetEveManager()->GetGlobalScene() ;
       for (auto i = c.begin(); i != c.end(); ++i) {
         std::cout << "  Loading detector " << (*i).first << " ..." << std::endl ;
         dd4hep::DetElement de = (*i).second ;
-        REX::REveElement* e = LoadDetElement(de, levels, parent);
+        ROOT::REveElement* e = LoadDetElement(de, levels, parent);
         if ( e )  {
           parent->AddElement( e ) ;
         }

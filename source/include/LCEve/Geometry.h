@@ -1,7 +1,9 @@
 #pragma once
+
 // -- std headers
 #include <string>
 
+// -- dd4hep headers
 #include <DD4hep/Detector.h>
 #include <DD4hep/DD4hepUnits.h>
 #include <DDRec/DetectorData.h>
@@ -10,7 +12,9 @@
 
 // -- root headers
 #include <ROOT/REveTrackPropagator.hxx>
-namespace REX = ROOT::Experimental ;
+
+// -- lceve headers
+#include <LCEve/ROOTTypes.h>
 
 namespace lceve {
 
@@ -40,28 +44,34 @@ namespace lceve {
     const std::string &GetDetectorName() const ;
 
     /// Create a new track propagator
-    REX::REveTrackPropagator *CreateTrackPropagator() const ;
-    ///
-    REX::REveMagField *GetBField() const ;
-    ///
+    ROOT::REveTrackPropagator *CreateTrackPropagator() const ;
+    /// Get the global B field instance
+    ROOT::REveMagField *GetBField() const ;
+    /// Helper function to get the layered calorimeter data for a specific detector
     const dd4hep::rec::LayeredCalorimeterData *GetLayeredCaloData(unsigned int includeFlag, unsigned int excludeFlag = 0) const ;
 
 
   private:
-    static REX::REveElement *CreateEveShape( int level, int maxLevel, REX::REveElement *parent,
+    /// Recursive function creating an eve shape from a geo node
+    static ROOT::REveElement *CreateEveShape( int level, int maxLevel, ROOT::REveElement *parent,
       TGeoNode *node, const TGeoHMatrix& mat, const std::string& name ) ;
 
-    static REX::REveElement *LoadDetElement( dd4hep::DetElement det, int levels, REX::REveElement* parent ) ;
+    /// Load the detector element (top level function)
+    static ROOT::REveElement *LoadDetElement( dd4hep::DetElement det, int levels, ROOT::REveElement* parent ) ;
 
+    /// Load the DD4hep geometry in Eve 
     void LoadGeometry( dd4hep::Detector &detector ) ;
 
+    /// Extract the detector out of the compact file
+    /// Can be either the file name without extension
+    /// or from the <info> XML element in the compact file itself
     std::string ExtractDetectorName( const std::string &compactFile ) const ;
 
   private:
-    bool                              _loaded {false} ;
-    EventDisplay                     *_eventDisplay {nullptr} ;
-    REX::REveMagField                *_bfield {nullptr} ;
-    std::string                       _detectorName {"Unknown"} ;
+    bool                              fLoaded {false} ;
+    EventDisplay                     *fEventDisplay {nullptr} ;
+    ROOT::REveMagField               *fBField {nullptr} ;
+    std::string                       fDetectorName {"Unknown"} ;
   };
 
 }
