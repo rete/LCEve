@@ -3,9 +3,9 @@
 #include <ROOT/REveManager.hxx>
 #include <ROOT/REveElement.hxx>
 #include <TApplication.h>
-namespace REX = ROOT::Experimental ;
 
 // -- lceve headers
+#include <LCEve/ROOTTypes.h>
 #include <LCEve/Settings.h>
 
 namespace EVENT {
@@ -22,7 +22,7 @@ namespace lceve {
    *  Central class in the event display framework.
    *  Provides access to all components of the event display
    */
-  class EventDisplay : public REX::REveElement {
+  class EventDisplay : public ROOT::REveElement {
   public:
     // no copy
     EventDisplay( const EventDisplay & ) = delete ;
@@ -41,7 +41,7 @@ namespace lceve {
     void QuitRoot() ;
 
     /// Get the Eve manager instance
-    REX::REveManager *GetEveManager() const ;
+    ROOT::REveManager *GetEveManager() const ;
     /// Get the event navigator
     EventNavigator *GetEventNavigator() const ;
     /// Get the ROOT application
@@ -55,11 +55,11 @@ namespace lceve {
     void VisualizeEvent( const EVENT::LCEvent *const event ) ;
 
   private:
-    TApplication                     *_application {nullptr} ;
-    REX::REveManager                 *_eveManager {nullptr} ;
-    EventNavigator                   *_navigator {nullptr} ;
-    Geometry                         *_geometry {nullptr} ;
-    Settings                          _settings {} ;
+    TApplication                     *fApplication {nullptr} ;
+    ROOT::REveManager                *fEveManager {nullptr} ;
+    EventNavigator                   *fNavigator {nullptr} ;
+    Geometry                         *fGeometry {nullptr} ;
+    Settings                          fSettings {} ;
 
     ClassDef( EventDisplay, 0 ) ;
   };

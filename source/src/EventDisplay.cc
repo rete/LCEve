@@ -23,46 +23,46 @@ namespace lceve {
 
   EventDisplay::EventDisplay() {
     SetName( "EventDisplay" ) ;
-    _navigator = new EventNavigator( this ) ;
-    _geometry = new Geometry( this ) ;
+    fNavigator = new EventNavigator( this ) ;
+    fGeometry = new Geometry( this ) ;
   }
 
   //--------------------------------------------------------------------------
 
   EventDisplay::~EventDisplay() {
-    if(_application) delete _application ;
-    delete _navigator ;
-    delete _geometry ;
+    if(fApplication) delete fApplication ;
+    delete fNavigator ;
+    delete fGeometry ;
   }
 
   //--------------------------------------------------------------------------
 
-  REX::REveManager *EventDisplay::GetEveManager() const {
-    return _eveManager ;
+  ROOT::REveManager *EventDisplay::GetEveManager() const {
+    return fEveManager ;
   }
 
   //--------------------------------------------------------------------------
 
   EventNavigator *EventDisplay::GetEventNavigator() const {
-    return _navigator ;
+    return fNavigator ;
   }
 
   //--------------------------------------------------------------------------
 
   TApplication *EventDisplay::GetApplication() const  {
-    return _application ;
+    return fApplication ;
   }
 
   //--------------------------------------------------------------------------
 
   Geometry *EventDisplay::GetGeometry() const  {
-    return _geometry ;
+    return fGeometry ;
   }
 
   //--------------------------------------------------------------------------
 
   const Settings &EventDisplay::GetSettings() const {
-    return _settings ;
+    return fSettings ;
   }
 
   //--------------------------------------------------------------------------
@@ -103,29 +103,29 @@ namespace lceve {
 
     /// Fill the application settings with parsed values
     if( readColNamesArg.isSet() ) {
-      _settings.SetReadCollectionNames( readColNamesArg.getValue() ) ;
+      fSettings.SetReadCollectionNames( readColNamesArg.getValue() ) ;
     }
-    _settings.SetServerMode( serverModeArg.getValue() ) ;
-    _settings.SetDSTMode( dstModeArg.getValue() ) ;
-    _settings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
+    fSettings.SetServerMode( serverModeArg.getValue() ) ;
+    fSettings.SetDSTMode( dstModeArg.getValue() ) ;
+    fSettings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
     if( portArg.isSet() ) {
       gEnv->SetValue( "WebGui.HttpPort", portArg.getValue() ) ;
     }
 
     // Create the ROOT application running the event loop
-    _application = new TApplication( "LCEve application", nullptr, nullptr ) ;
+    fApplication = new TApplication( "LCEve application", nullptr, nullptr ) ;
 
     /// Create the Eve manager
-    _eveManager = REX::REveManager::Create() ;
-    _eveManager->GetWorld()->AddElement( this ) ;
+    fEveManager = ROOT::REveManager::Create() ;
+    fEveManager->GetWorld()->AddElement( this ) ;
 
     /// Load the DD4hep compact file
-    _geometry->LoadCompactFile( compactFileArg.getValue() ) ;
+    fGeometry->LoadCompactFile( compactFileArg.getValue() ) ;
     /// Initialize the LCIO event navigator
-    _navigator->Init() ;
+    fNavigator->Init() ;
     /// Open the LCIO files if any
     if( lcioFilesArg.isSet() ) {
-      _navigator->Open( lcioFilesArg.getValue() ) ;
+      fNavigator->Open( lcioFilesArg.getValue() ) ;
     }
 
     // Initialize OpenUI custom scripts
