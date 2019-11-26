@@ -74,6 +74,7 @@ set( LINKDEF_FILE source/include/LinkDef.h )
 set( DICTIONARY_HEADERS
   LCEve/EventNavigator.h
   LCEve/EventDisplay.h
+  LCEve/IEventNavigator.h
 )
 root_generate_dictionary(
   LCEveDict ${DICTIONARY_HEADERS}
