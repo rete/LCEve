@@ -21,31 +21,31 @@ namespace lceve {
   /// Describe the properties of a marker (color, size, style)
   struct MarkerAttributes {
     /// The marker color
-    std::optional<Int_t>                 fColor ;
+    std::optional<Int_t>                 fColor {} ;
     /// The marker size
-    std::optional<Size_t>                fSize ;
+    std::optional<Size_t>                fSize {} ;
     /// The marker style
-    std::optional<Int_t>                 fStyle ;
+    std::optional<Int_t>                 fStyle {} ;
   };
 
   /// LineAttributes struct
   /// Describe the properties of a line (color, width, style)
   struct LineAttributes {
     /// The line color
-    std::optional<Int_t>                 fColor ;
+    std::optional<Int_t>                 fColor {} ;
     /// The line width
-    std::optional<Size_t>                fWidth ;
+    std::optional<Size_t>                fWidth {} ;
     /// The line style
-    std::optional<Int_t>                 fStyle ;
+    std::optional<Int_t>                 fStyle {} ;
   };
 
   /// FillAttributes struct
   /// Describe the properties for filling areas (color, style)
   struct FillAttributes {
     /// The fill color
-    std::optional<Int_t>                 fColor ;
+    std::optional<Int_t>                 fColor {} ;
     /// The fill style
-    std::optional<Int_t>                 fStyle ;
+    std::optional<Int_t>                 fStyle {} ;
   };
 
 
