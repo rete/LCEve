@@ -9,6 +9,9 @@
 #include <ROOT/REveScene.hxx>
 #include <Rtypes.h>
 
+// -- std headers
+#include <ctime>
+
 namespace lceve {
 
   class EventDisplay ;
