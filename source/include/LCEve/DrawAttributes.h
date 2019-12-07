@@ -20,6 +20,14 @@ namespace lceve {
     kGreen-9, kBlue-9, kRed-9, kMagenta-9, kCyan-9,
     kViolet-9, kPink-9, kOrange-9, kYellow-9
   };
+  
+  /// Get a random color based on the memory address of the object
+  template <typename T>
+  inline static Int_t RandomColor( const T *const ptr ) {
+    static const std::vector<Int_t> colors {colorList} ;
+    auto addr = reinterpret_cast<std::size_t>( ptr ) ;
+    return colors[addr % colorList.size()] ;
+  }
 
   enum class ColorIterStrategy {
     /// Always return the same color
