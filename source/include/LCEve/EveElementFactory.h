@@ -14,24 +14,71 @@ namespace lceve {
     EveElementFactory() = default ;
     ~EveElementFactory() = default ;
 
+    /** @defgroup Object factories
+     *  Factory methods for single object creation
+     *  @{
+     */
     /// Create a track out track parameters
-    ROOT::REveTrack *CreateTrack( const TrackParameters &parameters ) const ;
+    EveTrack *CreateTrack( ROOT::REveTrackPropagator *propagator, const TrackParameters &parameters ) const ;
 
     /// Create a vertex out of vertex parameters
-    ROOT::REveEllipsoid *CreateVertex( const VertexParameters &parameters ) const ;
-
-    /// Create a vertex out of vertex parameters
-#pragma message "FIXME, Use a REveBoxSet instead of a REvePointSet"
-    ROOT::REvePointSet *CreateCalorimeterHits( const CaloHitParameters &parameters ) const ;
-
+    EveVertex *CreateVertex( const VertexParameters &parameters ) const ;
+    
     /// Create a cluster out of cluster parameters
-    ROOT::REveElement *CreateCluster( const ClusterParameters &parameters ) const ;
+    EveCluster *CreateCluster( const ClusterParameters &parameters ) const ;
 
     /// Create a reco particle out of reco particle parameters
-    ROOT::REveElement *CreateRecoParticle( const RecoParticleParameters &parameters ) const ;
+    EveRecoParticle *CreateRecoParticle( const RecoParticleParameters &parameters ) const ;
 
     /// Create a jet cone out of jet parameters
-    ROOT::REveJetCone *CreateJet( const JetParameters &parameters ) const ;
+    EveJet *CreateJet( const JetParameters &parameters ) const ;
+    
+    /// Create a eve MC particle out of MC particle parameters
+    EveMCParticle *CreateMCParticle( const MCParticleParameters &parameters ) const ;
+    /** @} */
+
+    /** @defgroup Container factories
+     *  Factory methods for containers creation
+     *  @{
+     */
+    /// Create track container
+    std::unique_ptr<TrackContainer> CreateTrackContainer() const ;
+    
+    /// Create vertex container
+    std::unique_ptr<VertexContainer> CreateVertexContainer() const ;
+    
+    /// Create cluster container
+    std::unique_ptr<ClusterContainer> CreateClusterContainer() const ;
+    
+    /// Create reco particle container
+    std::unique_ptr<RecoParticleContainer> CreateRecoParticleContainer() const ;
+    
+    /// Create jet container
+    std::unique_ptr<JetContainer> CreateJetContainer() const ;
+    
+    /// Create jet container
+    std::unique_ptr<MCParticleContainer> CreateMCParticleContainer() const ;
+    
+    /// Create calorimeter hit container
+    std::unique_ptr<CaloHitContainer> CreateCaloHitContainer() const ;
+    
+    /// Create tracker hit container
+    std::unique_ptr<TrackerHitContainer> CreateTrackerHitContainer() const ;
+    /** @} */
+    
+    /** @defgroup Helper functions
+     *  Helper methods acting on Eve element objects
+     *  @{
+     */
+    /// Populate the calo hit container with hits from parameters
+    void PopulateCaloHits( CaloHitContainer *container, const std::vector<CaloHitParameters> &caloHits ) const ;
+    
+    /** @} */
+    
+  private:
+    /// Convert the properties as string. Formatted to be displayed
+    /// in an object tooltip
+    std::string PropertiesAsString( const PropertyMap &properties ) const ;
   };
 
 }

@@ -1,5 +1,6 @@
 
 #include <LCEve/EveElementFactory.h>
+#include <LCEve/DrawAttributes.h>
 
 // -- ROOT headers
 #include <ROOT/REveVector.hxx>
@@ -10,63 +11,75 @@
 #include <TMatrixDSym.h>
 #include <TVectorD.h>
 
+// -- std headers
+#include <sstream>
+#include <iostream>
+
 namespace lceve {
 
-  ROOT::REveTrack *EveElementFactory::CreateTrack( const TrackParameters &parameters ) const {
+  EveTrack *EveElementFactory::CreateTrack( ROOT::REveTrackPropagator *propagator, const TrackParameters &parameters ) const {
     try {
       ROOT::REveRecTrack trackInfo ;
-      trackInfo.fV = parameters.fStartPosition.value() ;
-      trackInfo.fP = parameters.fStartMomentum.value() ;
+      trackInfo.fV = parameters.fReferencePoint.value() ;
+      trackInfo.fP = parameters.fMomentum.value() ;
       trackInfo.fSign = parameters.fCharge.value() ;
-
-      auto eveTrack = std::make_unique<ROOT::REveTrack>( &trackInfo, parameters.fPropagator.value() ) ;
+      // Create the track
+      auto eveTrack = std::make_unique<EveTrack>( &trackInfo, propagator ) ;
       eveTrack->MakeTrack() ;
+      auto defColor = RandomColor( eveTrack.get() ) ;  
       if( parameters.fMarkerAttributes ) {
-        if( parameters.fMarkerAttributes.value().fColor ) {
-          eveTrack->SetMarkerColor( parameters.fMarkerAttributes.value().fColor.value() ) ;
+        auto attr = parameters.fMarkerAttributes.value() ;
+        eveTrack->SetMarkerColor( attr.fColor.value_or( RandomColor( eveTrack.get() ) ) ) ;
+        if( attr.fSize ) {
+          eveTrack->SetMarkerSize( attr.fSize.value() ) ;
         }
-        if( parameters.fMarkerAttributes.value().fSize ) {
-          eveTrack->SetMarkerSize( parameters.fMarkerAttributes.value().fSize.value() ) ;
-        }
-        if( parameters.fMarkerAttributes.value().fStyle ) {
-          eveTrack->SetMarkerStyle( parameters.fMarkerAttributes.value().fStyle.value() ) ;
+        if( attr.fStyle ) {
+          eveTrack->SetMarkerStyle( attr.fStyle.value() ) ;
         }
       }
+      LineAttributes defAttr ;
+      defAttr.fColor = defColor ; defAttr.fWidth = 2 ;
+      auto attr = parameters.fLineAttributes.value_or( defAttr ) ;
 #pragma message "FIXME: Settings twice the color for tracks: 1) main color, 2) line color"
-      eveTrack->SetMainColor( parameters.fLineAttributes.value().fColor.value() ) ;
-      eveTrack->SetLineColor( parameters.fLineAttributes.value().fColor.value() ) ;
-      if( parameters.fLineAttributes.value().fWidth ) {
-        eveTrack->SetLineWidth( parameters.fLineAttributes.value().fWidth.value() ) ;
+      eveTrack->SetMainColor( attr.fColor.value_or( defColor ) ) ;
+      eveTrack->SetLineColor( attr.fColor.value_or( defColor ) ) ;
+      eveTrack->SetLineWidth( attr.fWidth.value_or( 2 ) ) ;
+      if( attr.fStyle ) {
+        eveTrack->SetLineStyle( attr.fStyle.value() ) ;
       }
-      if( parameters.fMarkerAttributes.value().fStyle ) {
-        eveTrack->SetLineStyle( parameters.fLineAttributes.value().fStyle.value() ) ;
-      }
-      eveTrack->SetPickable( parameters.fPickable.value() ) ;
+      eveTrack->SetPickable( parameters.fPickable.value_or( true ) ) ;
       if( parameters.fUserData ) {
         eveTrack->SetUserData( parameters.fUserData.value() ) ;
       }
       for( auto &trackState : parameters.fTrackStates ) {
-
         auto type = ROOT::REvePathMark::kReference ;
         if( trackState.fType.value() == TrackStateType::AtEnd ) {
           type = ROOT::REvePathMark::kDecay ;
         }
         ROOT::REvePathMark eveMark( type ) ;
         eveMark.fV = trackState.fReferencePoint.value() ;
-        eveMark.fP = ObjectHelper::ComputeMomentum(
-          trackState.fBField.value(), trackState.fOmega.value(),
-          trackState.fPhi.value(), trackState.fTanLambda.value() ) ;
+        eveMark.fP = trackState.fMomentum.value() ;
         eveTrack->AddPathMark( eveMark );
       }
-#pragma message "FIXME: The title is not display as tooltip, the name is usd instead"
       // so here I set the name as the title to display the tooltip correctly.
       // When this is fixed we should switch back to SetName( trkName.str() ) ;
       // eveTrack->SetName( trkName.str() ) ;
+      
+      // Track name
       std::stringstream trkName ;
-      trkName << "Track p=" << parameters.fStartMomentum.value().Mag() << " GeV";
-#pragma message "TODO: Re-write the code for generating the eve track tooltip"
+      trkName << "Track p=" << parameters.fMomentum.value().Mag() << " GeV";
       eveTrack->SetName( trkName.str() ) ;
-      eveTrack->SetTitle( trkName.str() ) ;
+      
+      // Track title
+      auto pos = parameters.fReferencePoint.value() ;
+      std::stringstream trkTitle ;
+      trkTitle << "Track p=" << parameters.fMomentum.value().Mag() << " GeV" << std::endl ;
+      trkTitle << "----------------------------------" << std::endl ;
+      trkTitle << "Charge = " << parameters.fCharge.value() << std::endl ;
+      trkTitle << "Reference point = (" << pos[0] << ", " << pos[1] << ", " << pos[2] << ") cm" << std::endl ;
+      trkTitle << "----------------------------------" << std::endl ;
+      trkTitle << this->PropertiesAsString( parameters.fProperties ) << std::endl ;
+      eveTrack->SetTitle( trkTitle.str() ) ;
 
       return eveTrack.release() ;
     }
@@ -78,75 +91,171 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveEllipsoid *EveElementFactory::CreateVertex( const VertexParameters &parameters ) const {
-    auto eveVertex = new ROOT::REveEllipsoid() ;
-    std::stringstream vertexName ;
-    auto position = parameters.fPosition.value() ;
-    vertexName << "Vertex (" << position[0] << ", " << position[1] << ", " << position[2] << ")" ;
-    eveVertex->SetName( vertexName.str() ) ;
-#pragma message "Implement eve vertex title"
-    // set vertex position
-    eveVertex->RefMainTrans().SetPos( parameters.fPosition.value().Arr() ) ;
-    // Set line attributes
-    if( parameters.fLineAttributes ) {
-      if( parameters.fLineAttributes.value().fWidth ) {
-        eveVertex->SetLineWidth( parameters.fLineAttributes.value().fWidth.value() ) ;
-      }    
-      if( parameters.fLineAttributes.value().fWidth ) {
-        eveVertex->SetLineWidth( parameters.fLineAttributes.value().fWidth.value() ) ;
-      }
-      if( parameters.fLineAttributes.value().fStyle ) {
-        eveVertex->SetLineStyle( parameters.fLineAttributes.value().fStyle.value() ) ;
+  EveVertex *EveElementFactory::CreateVertex( const VertexParameters &parameters ) const {
+    try {
+      auto eveVertex = std::make_unique<EveVertex>() ;
+      auto position = parameters.fPosition.value() ;
+      // set vertex position
+      eveVertex->RefMainTrans().SetPos( position.Arr() ) ;
+      auto defColor = RandomColor( eveVertex.get() ) ;
+      // Set line attributes
+      LineAttributes defAttr ;
+      defAttr.fColor = defColor ; defAttr.fWidth = 2 ;
+      auto attr = parameters.fLineAttributes.value_or( defAttr ) ;
+      eveVertex->SetLineColor( attr.fColor.value_or( defColor ) ) ;
+      eveVertex->SetLineWidth( attr.fWidth.value_or( 2 ) ) ;
+      if( attr.fStyle ) {
+        eveVertex->SetLineStyle( attr.fStyle.value() ) ;
       }      
-    }
-    // Calculate vertex extent using vertex errors
-    // The 6 parameters of a symetric matrix 
-    auto errors = parameters.fErrors.value() ;
-    TMatrixDSym xxx(3) ;
-    xxx(0, 0) = errors[0] ;
-    xxx(1, 0) = errors[1] ; xxx(1, 1) = errors[2] ;
-    xxx(2, 0) = errors[3] ; xxx(2, 1) = errors[4] ; xxx(2, 2) = errors[5] ;
-    // Get eigen vectors
-    TMatrixDEigen eig(xxx);
-    TVectorD eigenValues = TVectorD( eig.GetEigenValues() ).Sqrt() ;
-    TMatrixD eigenVectors = eig.GetEigenVectors();
-    ROOT::REveVector baseVectors[3];
-    for (int i = 0; i < 3; ++i) {
-       baseVectors[i].Set(eigenVectors(0,i), eigenVectors(1,i), eigenVectors(2,i));
+      // Calculate vertex extent using vertex errors
+      // The 6 parameters of a symetric matrix 
+      auto errors = parameters.fErrors.value() ;
+      TMatrixDSym xxx(3) ;
+      xxx(0, 0) = errors[0] ;
+      xxx(1, 0) = errors[1] ; xxx(1, 1) = errors[2] ;
+      xxx(2, 0) = errors[3] ; xxx(2, 1) = errors[4] ; xxx(2, 2) = errors[5] ;
+      // Get eigen vectors
+      TMatrixDEigen eig(xxx);
+      TVectorD eigenValues = TVectorD( eig.GetEigenValues() ).Sqrt() ;
+      TMatrixD eigenVectors = eig.GetEigenVectors();
+      ROOT::REveVector baseVectors[3];
+      for (int i = 0; i < 3; ++i) {
+         baseVectors[i].Set(eigenVectors(0,i), eigenVectors(1,i), eigenVectors(2,i));
 #pragma message "FIXME: Find a way to tune the eve vertex extent factor"
-       baseVectors[i] *=  eigenValues(i)*500 ;
+         baseVectors[i] *=  eigenValues(i)*500 ;
+      }
+      eveVertex->SetBaseVectors( baseVectors[0], baseVectors[1], baseVectors[2] ) ;
+      eveVertex->Outline();
+      
+      // Vertex name
+      std::stringstream vertexName ;
+      vertexName << "Vertex (" << position[0] << ", " << position[1] << ", " << position[2] << ") cm" ;
+      eveVertex->SetName( vertexName.str() ) ;
+      
+      // Vertex title
+      std::stringstream vertexTitle ;
+      vertexTitle << "Position = (" << position[0] << ", " << position[1] << ", " << position[2] << ") cm" << std::endl ;
+      vertexTitle << "Level = " << parameters.fLevel.value() << std::endl ;
+      vertexTitle << "Errors: " << FormatReal(errors[0]) << std::endl ;
+      vertexTitle << "        " << FormatReal(errors[1]) << " " << FormatReal(errors[2]) << std::endl ;
+      vertexTitle << "        " << FormatReal(errors[3]) << " " << FormatReal(errors[4]) << " " << FormatReal(errors[5]) << std::endl ;
+      vertexTitle << "----------------------------------" << std::endl ;
+      vertexTitle << this->PropertiesAsString( parameters.fProperties ) << std::endl ;
+      eveVertex->SetTitle( vertexTitle.str() ) ;
+      
+      return eveVertex.release() ;
     }
-    eveVertex->SetBaseVectors( baseVectors[0], baseVectors[1], baseVectors[2] ) ;
-    eveVertex->Outline();
-    return eveVertex ;
-  }
-
-  //--------------------------------------------------------------------------
-
-  ROOT::REvePointSet *EveElementFactory::CreateCalorimeterHits( const CaloHitParameters &/*parameters*/ ) const {
-#pragma message "TODO: Implement Eve vertex factory method"
+    catch( std::bad_optional_access &e ) {
+      std::cout << "Couldn't create EveVertex. Missing input parameter(s)" << std::endl ;
+    }
     return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveElement *EveElementFactory::CreateCluster( const ClusterParameters &/*parameters*/ ) const {
-#pragma message "TODO: Implement Eve cluster factory method"
+  EveCluster *EveElementFactory::CreateCluster( const ClusterParameters &parameters ) const {
+    try {
+      auto eveCluster = std::make_unique<EveCluster>() ;
+      auto defColor = RandomColor( eveCluster.get() ) ;
+      MarkerAttributes defAttr ;
+      defAttr.fColor = defColor ; defAttr.fSize = 3 ; defAttr.fStyle = 4 ;
+      auto attr = parameters.fMarkerAttributes.value_or( defAttr ) ;
+      eveCluster->SetMarkerColor( attr.fColor.value_or( defColor ) ) ;
+      eveCluster->SetMarkerSize( attr.fSize.value_or( 3 ) ) ;
+      eveCluster->SetMarkerStyle( attr.fStyle.value_or( 4 ) ) ;
+      // fill the cluster with calo hits
+      auto caloHits = parameters.fCaloHits.value() ;
+      this->PopulateCaloHits( eveCluster.get(), caloHits ) ;
+      // generate name and title based on cluster properties
+      std::stringstream clusterName ;
+      clusterName << "Cluster E=" << parameters.fEnergy.value() << " GeV" ;
+      std::stringstream clusterTitle ;
+      clusterTitle << "Cluster E=" << parameters.fEnergy.value() << " GeV" << std::endl ;
+      if( parameters.fCaloHits ) {
+        clusterTitle << "NHits: " << parameters.fCaloHits.value().size() << std::endl ;
+      }
+      clusterTitle << "----------------------------------" << std::endl ;
+      clusterTitle << this->PropertiesAsString( parameters.fProperties ) ;
+      eveCluster->SetName( clusterName.str() ) ;
+      eveCluster->SetTitle( clusterTitle.str() ) ;
+      // release on return
+      return eveCluster.release() ;
+    }
+    catch( std::bad_optional_access &e ) {
+      std::cout << "Couldn't create EveCluster. Missing input parameter(s)" << std::endl ;
+    }
     return nullptr ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveElement *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &/*parameters*/ ) const {
-#pragma message "TODO: Implement Eve reco particle factory method"
-    return nullptr ;
+  std::unique_ptr<TrackContainer> EveElementFactory::CreateTrackContainer() const {
+    return std::make_unique<TrackContainer>() ;
   }
 
   //--------------------------------------------------------------------------
 
-  ROOT::REveJetCone *EveElementFactory::CreateJet( const JetParameters &/*parameters*/ ) const {
-#pragma message "TODO: Implement Eve jet factory method"
-    return nullptr ;
+  std::unique_ptr<VertexContainer> EveElementFactory::CreateVertexContainer() const {
+    return std::make_unique<VertexContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<ClusterContainer> EveElementFactory::CreateClusterContainer() const {
+    return std::make_unique<ClusterContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<RecoParticleContainer> EveElementFactory::CreateRecoParticleContainer() const {
+    return std::make_unique<RecoParticleContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<JetContainer> EveElementFactory::CreateJetContainer() const {
+    return std::make_unique<JetContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<MCParticleContainer> EveElementFactory::CreateMCParticleContainer() const {
+    return std::make_unique<MCParticleContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<CaloHitContainer> EveElementFactory::CreateCaloHitContainer() const {
+    return std::make_unique<CaloHitContainer>() ;
+  }
+
+  //--------------------------------------------------------------------------
+
+  std::unique_ptr<TrackerHitContainer> EveElementFactory::CreateTrackerHitContainer() const {
+    return std::make_unique<TrackerHitContainer>() ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  void EveElementFactory::PopulateCaloHits( CaloHitContainer *container, const std::vector<CaloHitParameters> &caloHits ) const {
+    // TODO: re-implement with REveBoxSet when available
+    for( auto &c : caloHits ) {
+      auto p = c.fPosition.value() ;
+      container->SetNextPoint( p[0], p[1], p[2] ) ;
+    }
+  }
+  
+  //--------------------------------------------------------------------------
+
+  std::string EveElementFactory::PropertiesAsString( const PropertyMap &properties ) const {
+    std::stringstream ss ;
+    for( auto &p : properties.items() ) {
+      if( p.value().is_object() ) {
+        continue;
+      }
+      ss << p.key() << ": " << p.value().dump() << std::endl ;
+    }
+    return ss.str() ;
   }
 
 }
