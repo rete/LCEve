@@ -232,6 +232,10 @@ namespace lceve {
     std::optional<ROOT::REveVectorT<float>>            fVertexMomentum {} ;
     /// The MC particle endpoint momentum
     std::optional<ROOT::REveVectorT<float>>            fEndpointMomentum {} ;
+    /// Whether the MC track is pickable on the display (default is true)
+    std::optional<bool>                                fPickable {true} ;
+    /// Optional user data (framework MC particle ?)
+    std::optional<void*>                               fUserData {} ;
     /// Additional MC particle properties
     PropertyMap                                        fProperties {} ;
   };
