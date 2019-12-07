@@ -45,6 +45,8 @@ namespace lceve {
 
     /// Create a new track propagator
     ROOT::REveTrackPropagator *CreateTrackPropagator() const ;
+    /// Create a new MC particle propagator
+    ROOT::REveTrackPropagator *CreateMCParticlePropagator() const ;
     /// Get the global B field instance
     ROOT::REveMagField *GetBField() const ;
     /// Helper function to get the layered calorimeter data for a specific detector
@@ -75,8 +77,10 @@ namespace lceve {
     EventDisplay                     *fEventDisplay {nullptr} ;
     ROOT::REveMagField               *fBField {nullptr} ;
     std::string                       fDetectorName {"Unknown"} ;
-    double                            fPropagatorMaxR {0.} ;
-    double                            fPropagatorMaxZ {0.} ;
+    double                            fTrackMaxR {0.} ;
+    double                            fTrackMaxZ {0.} ;
+    double                            fMCParticleMaxR {0.} ;
+    double                            fMCParticleMaxZ {0.} ;
   };
 
 }

@@ -79,8 +79,19 @@ namespace lceve {
     auto prop = new ROOT::REveTrackPropagator() ;
     prop->SetMagFieldObj( fBField, false ) ;
     prop->SetMaxOrbs(5) ;
-    prop->SetMaxR( fPropagatorMaxR ) ;
-    prop->SetMaxZ( fPropagatorMaxZ ) ;
+    prop->SetMaxR( fTrackMaxR ) ;
+    prop->SetMaxZ( fTrackMaxZ ) ;
+    return prop ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  ROOT::REveTrackPropagator *Geometry::CreateMCParticlePropagator() const {
+    auto prop = new ROOT::REveTrackPropagator() ;
+    prop->SetMagFieldObj( fBField, false ) ;
+    prop->SetMaxOrbs(5) ;
+    prop->SetMaxR( fMCParticleMaxR ) ;
+    prop->SetMaxZ( fMCParticleMaxZ ) ;
     return prop ;
   }
 
@@ -97,13 +108,7 @@ namespace lceve {
     dd4hep::Detector &mainDetector = dd4hep::Detector::getInstance() ;
     const auto& theDetectors = dd4hep::DetectorSelector(mainDetector).detectors( includeFlag, excludeFlag ) ;
     if( theDetectors.size()  != 1 ) {
-      std::stringstream es ;
-      es << " getExtension: selection is not unique (or empty)  includeFlag: " << dd4hep::DetType( includeFlag ) << " excludeFlag: " << dd4hep::DetType( excludeFlag )
-        << " --- found detectors : " ;
-      for( unsigned i=0, N= theDetectors.size(); i<N ; ++i ){
-        es << theDetectors.at(i).name() << ", " ;
-      }
-      throw std::runtime_error( es.str() ) ;
+      return nullptr ;
     }
     return theDetectors.at(0).extension<dd4hep::rec::LayeredCalorimeterData>() ;
   }
@@ -257,14 +262,31 @@ namespace lceve {
   //--------------------------------------------------------------------------
   
   void Geometry::CacheVariables() {
-    auto barrelData = GetLayeredCaloData(
+    auto ebData = GetLayeredCaloData(
       ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
       ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
-    auto endcapData = GetLayeredCaloData(
+    auto eeData = GetLayeredCaloData(
       ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP),
       ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
-    fPropagatorMaxR = barrelData->extent[0] ;
-    fPropagatorMaxZ = endcapData->extent[2] ;
+    auto hbData = GetLayeredCaloData(
+      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::BARREL),
+      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
+    auto heData = GetLayeredCaloData(
+      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::HADRONIC | dd4hep::DetType::ENDCAP),
+      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
+    
+    double minR(-1000.), maxR(1000.) ;
+    GetDetector().manager().GetTopVolume()->GetShape()->GetAxisRange(1, minR, maxR) ;
+    auto defaultMaxR = maxR-minR ;  
+    
+    double minZ(-1000.), maxZ(1000.) ;
+    GetDetector().manager().GetTopVolume()->GetShape()->GetAxisRange(3, minZ, maxZ) ;
+    auto defaultMaxZ = maxZ-minZ ;  
+
+    fTrackMaxR = (nullptr == ebData) ? defaultMaxR : ebData->extent[0] ;
+    fTrackMaxZ = (nullptr == eeData) ? defaultMaxZ : eeData->extent[2] ;    
+    fMCParticleMaxR = (nullptr == hbData) ? defaultMaxR : hbData->extent[0] ;
+    fMCParticleMaxZ = (nullptr == heData) ? defaultMaxZ : heData->extent[2] ;
   }
 
 }
