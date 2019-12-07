@@ -40,7 +40,6 @@ namespace lceve {
       LineAttributes defAttr ;
       defAttr.fColor = defColor ; defAttr.fWidth = 2 ;
       auto attr = parameters.fLineAttributes.value_or( defAttr ) ;
-#pragma message "FIXME: Settings twice the color for tracks: 1) main color, 2) line color"
       eveTrack->SetMainColor( attr.fColor.value_or( defColor ) ) ;
       eveTrack->SetLineColor( attr.fColor.value_or( defColor ) ) ;
       eveTrack->SetLineWidth( attr.fWidth.value_or( 2 ) ) ;
@@ -121,8 +120,7 @@ namespace lceve {
       ROOT::REveVector baseVectors[3];
       for (int i = 0; i < 3; ++i) {
          baseVectors[i].Set(eigenVectors(0,i), eigenVectors(1,i), eigenVectors(2,i));
-#pragma message "FIXME: Find a way to tune the eve vertex extent factor"
-         baseVectors[i] *=  eigenValues(i)*500 ;
+         baseVectors[i] *= eigenValues(i)*EveElementFactory::VertexExtentFactor ;
       }
       eveVertex->SetBaseVectors( baseVectors[0], baseVectors[1], baseVectors[2] ) ;
       eveVertex->Outline();

@@ -11,6 +11,10 @@ namespace lceve {
   /// to Eve elements
   class EveElementFactory {
   public:
+    /// An additional factor to the vertex extents
+    static constexpr float VertexExtentFactor = 500.f ;
+    
+  public:
     EveElementFactory() = default ;
     ~EveElementFactory() = default ;
 
