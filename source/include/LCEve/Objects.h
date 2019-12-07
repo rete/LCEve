@@ -12,10 +12,35 @@
 #include <string>
 #include <array>
 #include <map>
+#include <sstream>
 
 namespace lceve {
 
+  /// Additional properties for objects
+  /// Usage is implementation defined but usually
+  /// the key-values go in the object tooltip
   using PropertyMap = nlohmann::json ;
+  
+  /// Eve element containers for each object type
+  using TrackContainer = ROOT::REveElement ;
+  using VertexContainer = ROOT::REveElement ;
+  using ClusterContainer = ROOT::REveElement ;
+  using RecoParticleContainer = ROOT::REveElement ;
+  using JetContainer = ROOT::REveElement ;
+  using MCParticleContainer = ROOT::REveElement ;
+  using CaloHitContainer = ROOT::REvePointSet ;
+  using TrackerHitContainer = ROOT::REvePointSet ;
+
+  /// Eve element containers for each object type
+  using EveTrack = ROOT::REveTrack ;
+  using EveVertex = ROOT::REveEllipsoid ;
+  using EveCluster = CaloHitContainer ;
+  using EveRecoParticle = ROOT::REveElement ;
+  using EveJet = ROOT::REveJetCone ;
+  using EveMCParticle = ROOT::REveTrack ;
+  // NOTE: Calo hit and tracker hit have no Eve equivalents
+  // They are stored internally in their parent container
+  
 
   /// MarkerAttributes struct
   /// Describe the properties of a marker (color, size, style)
@@ -66,16 +91,8 @@ namespace lceve {
   struct TrackInfo {
     /// The track reference point
     std::optional<ROOT::REveVectorT<float>>            fReferencePoint {} ;
-    /// The track D0 parameter
-    std::optional<float>                               fD0 {} ;
-    /// The track phi parameter
-    std::optional<float>                               fPhi {} ;
-    /// The track omega parameter
-    std::optional<float>                               fOmega {} ;
-    /// The track Z0 parameter
-    std::optional<float>                               fZ0 {} ;
-    /// The track tan lambda parameter
-    std::optional<float>                               fTanLambda {} ;
+    /// The track momentum
+    std::optional<ROOT::REveVectorT<float>>            fMomentum {} ;
   };
 
 
@@ -83,8 +100,6 @@ namespace lceve {
   struct TrackState : public TrackInfo {
     /// The track state type
     std::optional<TrackStateType>                      fType {} ;
-    /// The value of the B field at the track state position
-    std::optional<float>                               fBField {} ;
   };
 
 
@@ -95,12 +110,6 @@ namespace lceve {
     std::optional<LineAttributes>                      fLineAttributes {} ;
     /// The track marker attributes
     std::optional<MarkerAttributes>                    fMarkerAttributes {} ;
-    /// The track propagator
-    std::optional<ROOT::REveTrackPropagator*>          fPropagator {} ;
-    /// The track starting position (vertex)
-    std::optional<ROOT::REveVectorT<float>>            fStartPosition {} ;
-    /// The track momentum at start position
-    std::optional<ROOT::REveVectorT<float>>            fStartMomentum {} ;
     /// The track charge
     std::optional<int>                                 fCharge {} ;
     /// An optional list of track markers (AKA track state)
@@ -132,8 +141,6 @@ namespace lceve {
   /// CaloHitParameters struct
   /// Necessary data to describe a calo hit
   struct CaloHitParameters {
-    /// The Eve parent box set in which the calo hit will be appended
-    std::optional<ROOT::REveBoxSet*>                   fParentBoxSet {} ;
     /// The calorimeter hit position
     std::optional<ROOT::REveVectorT<float>>            fPosition {} ;
     /// The calo hit color.
@@ -154,8 +161,8 @@ namespace lceve {
   struct ClusterParameters {
     /// The reconstructed cluster energy (unit GeV)
     std::optional<float>                               fEnergy {} ;
-    /// The cluster position
-    std::optional<ROOT::REveVectorT<float>>            fPosition {} ;
+    /// The cluster marker attributes
+    std::optional<MarkerAttributes>                    fMarkerAttributes {} ;
     /// The list of calorimeter hits
     std::optional<std::vector<CaloHitParameters>>      fCaloHits {} ;
     /// The cluster color.
@@ -201,13 +208,56 @@ namespace lceve {
     /// An optional list of reco particle to build
     std::optional<std::vector<RecoParticleParameters>> fParticles {} ;
   };
+  
+  /// MCParticleParameters struct 
+  /// Necessary data to describe and build a MC particle in Eve
+  /// MC particles are drawn as tracks. If the charge is not zero,
+  /// the track propagator is expected to be set
+  struct MCParticleParameters {
+    /// The MC particle energy
+    std::optional<float>                               fEnergy {} ;
+    /// The MC particle charge
+    std::optional<int>                                 fCharge {} ;
+    /// The MC particle mass
+    std::optional<float>                               fMass {} ;
+    /// The MC particle ID
+    std::optional<int>                                 fPID {} ;
+    /// The MC particle line attributes
+    std::optional<LineAttributes>                      fLineAttributes {} ;
+    /// The MC particle marker attributes
+    std::optional<MarkerAttributes>                    fMarkerAttributes {} ;
+    /// The MC particle vertex position
+    std::optional<ROOT::REveVectorT<float>>            fVertexPosition {} ;
+    /// The MC particle endpoint position
+    std::optional<ROOT::REveVectorT<float>>            fEndpointPosition {} ;
+    /// The MC particle momentum
+    std::optional<ROOT::REveVectorT<float>>            fVertexMomentum {} ;
+    /// The MC particle endpoint momentum
+    std::optional<ROOT::REveVectorT<float>>            fEndpointMomentum {} ;
+    /// Additional MC particle properties
+    PropertyMap                                        fProperties {} ;
+  };
+  
+  /// TrackerHitParameters struct
+  /// Necessary data to describe and build a tracker hit in Eve
+  struct TrackerHitParameters {
+    /// The tracker hit position
+    std::optional<ROOT::REveVectorT<float>>            fPosition {} ;
+    /// The tracker hit marker attributes
+    std::optional<MarkerAttributes>                    fMarkerAttributes {} ;
+  };
+  
+  template <typename T>
+  inline static std::string FormatReal( const T &val ) {
+    std::stringstream sstr ;
+    sstr << std::scientific << (val >= 0. ? "+" : "") << val ;
+    return sstr.str() ;
+  }
 
   class ObjectHelper {
   public:
     /// Compute the track momentum from track properties
     static ROOT::REveVectorT<float> ComputeMomentum( float bfield, float omega, float phi, float tanLambda ) ;
   };
-
-#pragma message "TODO: Added missing classes for MCParticle and TrackerHit"
 
 }
