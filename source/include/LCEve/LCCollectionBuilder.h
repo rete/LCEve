@@ -13,6 +13,7 @@
 #include <LCEve/DrawAttributes.h>
 #include <LCEve/Geometry.h>
 #include <LCEve/EventDisplay.h>
+#include <LCEve/HelixClass.h>
 
 // -- root headers
 #include <ROOT/REveElement.hxx>
@@ -107,17 +108,13 @@ namespace lceve {
   
   template <class TRK>
   inline REX::REveVector LCCollectionConverter::ComputeMomentum( const TRK *const trk ) const {
-    const auto referencePoint = trk->getReferencePoint() ;
-    const dd4hep::Position position ( referencePoint[0]*0.1, referencePoint[1]*0.1, referencePoint[2]*0.1 ) ;
-    double bfieldV[3] = {0} ;
-    _eventDisplay->GetGeometry()->GetDetector().field().magneticField( position  , bfieldV  ) ;
-    const double bfield = bfieldV[2]/dd4hep::tesla ;
-    const double omega = trk->getOmega() ;
-    const double pt(bfield* 2.99792e-4 / std::fabs(omega));
-    const double px(pt * std::cos(trk->getPhi()));
-    const double py(pt * std::sin(trk->getPhi()));
-    const double pz(pt * trk->getTanLambda());
-    return REX::REveVector( px, py, pz ) ;
+    // NOTE: strange convention with a minus sign.
+    // See also BField class returning -b from dd4hep, not b  
+    auto magField = _eventDisplay->GetGeometry()->GetBField()->GetFieldD( 0, 0, 0  ) ;
+    const double bfield = -magField[2] ;
+    HelixClass helix ;
+    helix.Initialize_Canonical( trk->getPhi(), trk->getD0(), trk->getZ0(), trk->getOmega(), trk->getTanLambda(), bfield ) ;
+    return REX::REveVector( helix.getMomentum() ) ;    
   }
 
 }
