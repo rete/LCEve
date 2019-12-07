@@ -24,7 +24,7 @@ if( NOT CMAKE_CXX_STANDARD )
   set( CMAKE_CXX_STANDARD 14 )
 endif()
 
-set( ROOT_COMPONENTS ROOTEve ROOTWebDisplay )
+set( ROOT_COMPONENTS EG ROOTEve ROOTWebDisplay )
 find_package( LCIO REQUIRED )
 find_package( ROOT 6.19 COMPONENTS ${ROOT_COMPONENTS} REQUIRED ) # work with master as of today
 FIND_PACKAGE( DD4hep COMPONENTS DDParsers REQUIRED )
