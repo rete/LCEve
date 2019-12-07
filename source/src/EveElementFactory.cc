@@ -1,12 +1,15 @@
 
 #include <LCEve/EveElementFactory.h>
 #include <LCEve/DrawAttributes.h>
+#include <LCEve/EventDisplay.h>
+#include <LCEve/Geometry.h>
 
 // -- ROOT headers
 #include <ROOT/REveVector.hxx>
 #include <ROOT/REveTrack.hxx>
 #include <ROOT/REveVSDStructs.hxx>
 #include <ROOT/REveEllipsoid.hxx>
+#include <Math/GenVector/LorentzVector.h>
 #include <TMatrixDEigen.h>
 #include <TMatrixDSym.h>
 #include <TVectorD.h>
@@ -16,6 +19,13 @@
 #include <iostream>
 
 namespace lceve {
+  
+  EveElementFactory::EveElementFactory( EventDisplay *lced ) :
+    fEventDisplay(lced) {
+    /* nop */
+  }
+  
+  //--------------------------------------------------------------------------
 
   EveTrack *EveElementFactory::CreateTrack( ROOT::REveTrackPropagator *propagator, const TrackParameters &parameters ) const {
     try {
@@ -181,6 +191,146 @@ namespace lceve {
     }
     catch( std::bad_optional_access &e ) {
       std::cout << "Couldn't create EveCluster. Missing input parameter(s)" << std::endl ;
+    }
+    return nullptr ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  EveRecoParticle *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &parameters ) const {
+    try {
+      auto eveParticle = std::make_unique<EveRecoParticle>() ;
+            
+      // Add tracks if any
+      if( parameters.fTracks ) {
+        auto tracks = parameters.fTracks.value() ;
+        auto eveTracks = this->CreateTrackContainer() ;
+        std::string trksName = Form("Tracks (%d)",(int)tracks.size()) ;
+        eveTracks->SetName( trksName ) ;
+        // Create propagator and tracks
+        auto propagator = fEventDisplay->GetGeometry()->CreateTrackPropagator() ;
+        for( auto &trk : tracks ) {
+          eveTracks->AddElement( this->CreateTrack( propagator, trk ) ) ;
+        }
+        eveParticle->AddElement( eveTracks.release() ) ;
+      }
+      
+      // Add tracks if any
+      if( parameters.fClusters ) {
+        auto clusters = parameters.fClusters.value() ;
+        auto eveClusters = this->CreateClusterContainer() ;
+        std::string clustersName = Form("Clusters (%d)",(int)clusters.size()) ;
+        eveClusters->SetName( clustersName ) ;
+        // Create clusters
+        for( auto &cl : clusters ) {
+          eveClusters->AddElement( this->CreateCluster( cl ) ) ;
+        }
+        eveParticle->AddElement( eveClusters.release() ) ;
+      }      
+
+      auto mom = parameters.fMomentum.value() ;
+      auto energy = parameters.fEnergy.value() ;
+      
+      // Particle name
+      std::stringstream particleName ;
+      particleName << "PFO E=" << parameters.fEnergy.value() << " GeV" ;
+      eveParticle->SetName( particleName.str() ) ;
+      
+      // Particle title
+      std::stringstream particleTitle ;
+      particleTitle << "Energy =" << energy << " GeV" << std::endl ;
+      float mass {0.f} ;
+      if( parameters.fMass ) {
+        mass = parameters.fMass.value() ;
+      }
+      else {
+        ROOT::Math::PxPyPzEVector lorVec( mom[0], mom[1], mom[2], energy ) ;
+        mass = lorVec.M() ;
+      }
+      particleTitle << "Mass = " << mass << " GeV" << std::endl ;
+      particleTitle << "P = " << mom.Mag() << " GeV" << std::endl ;
+      particleTitle << "Pt  = " << std::sqrt(mom[0]*mom[0] + mom[1]*mom[1]) << " GeV" << std::endl ;
+      particleTitle << "----------------------------------" << std::endl ;
+      particleTitle << this->PropertiesAsString( parameters.fProperties ) ;
+      eveParticle->SetTitle( particleTitle.str() ) ;
+      
+      // release on return
+      return eveParticle.release() ;
+    }
+    catch( std::bad_optional_access &e ) {
+      std::cout << "Couldn't create EveRecoParticle. Missing input parameter(s)" << std::endl ;
+    }
+    return nullptr ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  EveMCParticle *EveElementFactory::CreateMCParticle( ROOT::REveTrackPropagator *propagator, const MCParticleParameters &parameters ) const {
+    try {
+      ROOT::REveMCTrack eveMCTrack ;
+      auto energy = parameters.fEnergy.value() ;
+      auto pos = parameters.fVertexPosition.value() ;
+      auto mom = parameters.fVertexMomentum.value() ;
+      eveMCTrack.SetProductionVertex( pos[0], pos[1], pos[2], 0.f) ;
+      eveMCTrack.SetMomentum( mom[0], mom[1], mom[2], energy) ;
+      eveMCTrack.SetPdgCode( parameters.fPDG.value() ) ;
+      
+      // Create the MC particle track
+      auto eveMCParticle = std::make_unique<EveMCParticle>( &eveMCTrack, propagator ) ;
+      eveMCParticle->MakeTrack() ;
+      auto defColor = RandomColor( eveMCParticle.get() ) ;  
+      if( parameters.fMarkerAttributes ) {
+        auto attr = parameters.fMarkerAttributes.value() ;
+        eveMCParticle->SetMarkerColor( attr.fColor.value_or( RandomColor( eveMCParticle.get() ) ) ) ;
+        if( attr.fSize ) {
+          eveMCParticle->SetMarkerSize( attr.fSize.value() ) ;
+        }
+        if( attr.fStyle ) {
+          eveMCParticle->SetMarkerStyle( attr.fStyle.value() ) ;
+        }
+      }
+      LineAttributes defAttr ;
+      defAttr.fColor = defColor ; defAttr.fWidth = 2 ;
+      auto attr = parameters.fLineAttributes.value_or( defAttr ) ;
+      eveMCParticle->SetMainColor( attr.fColor.value_or( defColor ) ) ;
+      eveMCParticle->SetLineColor( attr.fColor.value_or( defColor ) ) ;
+      eveMCParticle->SetLineWidth( attr.fWidth.value_or( 2 ) ) ;
+      if( attr.fStyle ) {
+        eveMCParticle->SetLineStyle( attr.fStyle.value() ) ;
+      }
+      eveMCParticle->SetPickable( parameters.fPickable.value_or( true ) ) ;
+      if( parameters.fUserData ) {
+        eveMCParticle->SetUserData( parameters.fUserData.value() ) ;
+      }
+      // if available add endpoint path mark
+      if( parameters.fEndpointPosition ) {
+        ROOT::REvePathMark eveMark( ROOT::REvePathMark::kDecay ) ;
+        eveMark.fP = parameters.fEndpointPosition.value() ;
+        eveMCParticle->AddPathMark( eveMark );      
+      }
+      
+      // Particle name
+      std::stringstream particleName ;
+      particleName << "MCParticle PDG=" << parameters.fPDG.value() << ", E=" << energy << " GeV" ;
+      eveMCParticle->SetName( particleName.str() ) ;
+      
+      // Particle title
+      std::stringstream particleTitle ;
+      particleTitle << "PDG =" << parameters.fPDG.value() << std::endl ;
+      particleTitle << "Energy =" << energy << " GeV" << std::endl ;
+      particleTitle << "Mass = " << parameters.fMass.value() << " GeV" << std::endl ;
+      particleTitle << "Charge = " << parameters.fCharge.value() << std::endl ;
+      particleTitle << "P = " << mom.Mag() << " GeV" << std::endl ;
+      particleTitle << "Pt  = " << std::sqrt(mom[0]*mom[0] + mom[1]*mom[1]) << " GeV" << std::endl ;
+      particleTitle << "----------------------------------" << std::endl ;
+      particleTitle << this->PropertiesAsString( parameters.fProperties ) ;
+      eveMCParticle->SetTitle( particleTitle.str() ) ;
+      
+      // release on return
+      return eveMCParticle.release() ;
+    }
+    catch( std::bad_optional_access &e ) {
+      std::cout << "Couldn't create EveMCParticle. Missing input parameter(s)" << std::endl ;
     }
     return nullptr ;
   }

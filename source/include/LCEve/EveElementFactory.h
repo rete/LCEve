@@ -5,6 +5,8 @@
 #include <LCEve/Objects.h>
 
 namespace lceve {
+  
+  class EventDisplay ;
 
   /// EveElementFactory class
   /// Helper class to convert objects (see LCEve/Objects.h)
@@ -15,8 +17,11 @@ namespace lceve {
     static constexpr float VertexExtentFactor = 500.f ;
     
   public:
-    EveElementFactory() = default ;
+    EveElementFactory() = delete ;
     ~EveElementFactory() = default ;
+    
+    /// Constructor with event display
+    EveElementFactory( EventDisplay *lced ) ;
 
     /** @defgroup Object factories
      *  Factory methods for single object creation
@@ -35,10 +40,10 @@ namespace lceve {
     EveRecoParticle *CreateRecoParticle( const RecoParticleParameters &parameters ) const ;
 
     /// Create a jet cone out of jet parameters
-    EveJet *CreateJet( const JetParameters &parameters ) const ;
+    // EveJet *CreateJet( const JetParameters &parameters ) const ;
     
     /// Create a eve MC particle out of MC particle parameters
-    EveMCParticle *CreateMCParticle( const MCParticleParameters &parameters ) const ;
+    EveMCParticle *CreateMCParticle( ROOT::REveTrackPropagator *propagator, const MCParticleParameters &parameters ) const ;
     /** @} */
 
     /** @defgroup Container factories
@@ -83,6 +88,10 @@ namespace lceve {
     /// Convert the properties as string. Formatted to be displayed
     /// in an object tooltip
     std::string PropertiesAsString( const PropertyMap &properties ) const ;
+    
+  private:
+    /// The event display manager object
+    EventDisplay                  *fEventDisplay {nullptr} ;
   };
 
 }
