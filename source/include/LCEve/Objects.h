@@ -183,8 +183,6 @@ namespace lceve {
     std::optional<ROOT::REveVectorT<float>>            fMomentum {} ;
     /// The reco particle mass. If not given, computed from energy and momentum
     std::optional<float>                               fMass {} ;
-    /// The reco particle position
-    std::optional<ROOT::REveVectorT<float>>            fPosition {} ;
     /// The list of tracks
     std::optional<std::vector<TrackParameters>>        fTracks {} ;
     /// The list of cluster
@@ -220,8 +218,8 @@ namespace lceve {
     std::optional<int>                                 fCharge {} ;
     /// The MC particle mass
     std::optional<float>                               fMass {} ;
-    /// The MC particle ID
-    std::optional<int>                                 fPID {} ;
+    /// The MC particle PDG code
+    std::optional<int>                                 fPDG {} ;
     /// The MC particle line attributes
     std::optional<LineAttributes>                      fLineAttributes {} ;
     /// The MC particle marker attributes
