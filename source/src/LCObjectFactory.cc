@@ -3,6 +3,7 @@
 #include <LCEve/EventDisplay.h>
 #include <LCEve/Geometry.h>
 #include <LCEve/BField.h>
+#include <LCEve/HelixClass.h>
 
 namespace lceve {
   
@@ -16,16 +17,16 @@ namespace lceve {
   TrackState LCObjectFactory::ConvertTrackState( const EVENT::TrackState *const trackState ) const {
     auto bFieldPtr = fEventDisplay->GetGeometry()->GetBField() ;
     auto p = trackState->getReferencePoint() ;
+    auto bfield = bFieldPtr->GetField( p[0], p[1], p[2] ).Mag() ;
+    HelixClass helix ;
+    helix.Initialize_Canonical( 
+      trackState->getPhi(), trackState->getD0(), trackState->getZ0(), 
+      trackState->getOmega(), trackState->getTanLambda(), bfield ) ;
     // Fill parameters
     TrackState parameters {} ;
     parameters.fType = static_cast<TrackStateType>(trackState->getLocation()) ;
     parameters.fReferencePoint = ROOT::REveVectorT<float>( trackState->getReferencePoint() ) ;
-    parameters.fBField = bFieldPtr->GetField( p[0], p[1], p[2] ).Mag() ;
-    parameters.fD0 = trackState->getD0() ;
-    parameters.fPhi = trackState->getPhi() ;
-    parameters.fOmega = trackState->getOmega() ;
-    parameters.fZ0 = trackState->getZ0() ;
-    parameters.fTanLambda = trackState->getTanLambda() ;
+    parameters.fMomentum = ROOT::REveVectorT<float>( helix.getMomentum() ) ;
     return parameters ;
   }  
   
