@@ -66,12 +66,17 @@ namespace lceve {
     /// Can be either the file name without extension
     /// or from the <info> XML element in the compact file itself
     std::string ExtractDetectorName( const std::string &compactFile ) const ;
+    
+    /// Cache geometry variables often accessed
+    void CacheVariables() ;
 
   private:
     bool                              fLoaded {false} ;
     EventDisplay                     *fEventDisplay {nullptr} ;
     ROOT::REveMagField               *fBField {nullptr} ;
     std::string                       fDetectorName {"Unknown"} ;
+    double                            fPropagatorMaxR {0.} ;
+    double                            fPropagatorMaxZ {0.} ;
   };
 
 }

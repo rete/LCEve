@@ -49,6 +49,8 @@ namespace lceve {
     std::cout << "Detector name: "<< fDetectorName << std::endl ;
     std::cout << "Loading geometry in Eve. Please be patient..." << std::endl ;
     LoadGeometry( theDetector ) ;
+    // Cache a few geometry variables
+    this->CacheVariables() ;
     std::cout << "Loading geometry: done!" << std::endl ;
     fLoaded = true ;
   }
@@ -76,6 +78,9 @@ namespace lceve {
   ROOT::REveTrackPropagator *Geometry::CreateTrackPropagator() const {
     auto prop = new ROOT::REveTrackPropagator() ;
     prop->SetMagFieldObj( fBField, false ) ;
+    prop->SetMaxOrbs(5) ;
+    prop->SetMaxR( fPropagatorMaxR ) ;
+    prop->SetMaxZ( fPropagatorMaxZ ) ;
     return prop ;
   }
 
@@ -247,6 +252,19 @@ namespace lceve {
     }
     catch(...) {}
     return detectorName ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  void Geometry::CacheVariables() {
+    auto barrelData = GetLayeredCaloData(
+      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
+      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
+    auto endcapData = GetLayeredCaloData(
+      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP),
+      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
+    fPropagatorMaxR = barrelData->extent[0] ;
+    fPropagatorMaxZ = endcapData->extent[2] ;
   }
 
 }
