@@ -1,25 +1,20 @@
 
 #include <LCEve/LCCollectionBuilder.h>
+#include <LCEve/LCObjectFactory.h>
+#include <LCEve/EveElementFactory.h>
 #include <LCEve/EventDisplay.h>
 #include <LCEve/Geometry.h>
 
 #include <TRandom.h>
 #include <ROOT/REveScene.hxx>
 #include <ROOT/REveJetCone.hxx>
+#include <ROOT/REveEllipsoid.hxx>
 
 #include <EVENT/LCIO.h>
 
 #include <LCEve/DrawAttributes.h>
 
 namespace lceve {
-
-  template <typename T>
-  inline std::string FormatReal( const T &val ) {
-    std::stringstream sstr ;
-    sstr << std::scientific << (val >= 0. ? "+" : "") << val ;
-    return sstr.str() ;
-  }
-
 
   LCCollectionConverter::LCCollectionConverter( EventDisplay *lced ) :
     _eventDisplay(lced) {
@@ -65,6 +60,11 @@ namespace lceve {
         ColorIterator colors( ColorIterStrategy::AUTO_ITER, globalIter.NextColor() ) ;
         VisualizeRecoParticles( particles, colname, scene, colors ) ;
       }
+      else if( collection->getTypeName() == EVENT::LCIO::VERTEX ) {
+        auto vertices = asVector<EVENT::Vertex>( collection ) ;
+        ColorIterator colors( ColorIterStrategy::AUTO_ITER, globalIter.NextColor() ) ;
+        VisualizeVertices( vertices, colname, scene, colors ) ;
+      }
     }
     // LoadDummyData( scene ) ;
   }
@@ -84,85 +84,20 @@ namespace lceve {
       return ( rhsMomentum.Mag() < lhsMomentum.Mag() ) ;
     } ) ;
 
-    auto barrelData = _eventDisplay->GetGeometry()->GetLayeredCaloData(
-      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::BARREL),
-      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
-    auto endcapData = _eventDisplay->GetGeometry()->GetLayeredCaloData(
-      ( dd4hep::DetType::CALORIMETER | dd4hep::DetType::ELECTROMAGNETIC | dd4hep::DetType::ENDCAP),
-      ( dd4hep::DetType::AUXILIARY  |  dd4hep::DetType::FORWARD ) ) ;
-
+    LCObjectFactory lcFactory( _eventDisplay ) ;
+    EveElementFactory eveFactory( _eventDisplay ) ;
+    
     auto prop = _eventDisplay->GetGeometry()->CreateTrackPropagator() ;
-    prop->SetMaxOrbs(5) ;
-    prop->SetMaxR( barrelData->extent[0] ) ;
-    prop->SetMaxZ( endcapData->extent[2] ) ;
-
-    REX::REveElement *eveTrackList = new REX::REveElement( name ) ;
+    auto eveTrackList = eveFactory.CreateTrackContainer() ;
+    eveTrackList->SetName( name ) ;
     eveTrackList->SetMainColor(kTeal);
-    unsigned index = 0 ;
 
     for( auto lcTrack : tracks ) {
-
-      const auto *startTrackState = lcTrack->getTrackState( EVENT::TrackState::AtFirstHit ) ;
-      const auto startPoint = startTrackState->getReferencePoint() ;
-      auto momentumAtStart = ComputeMomentum( startTrackState ) ;
-
-      REX::REveRecTrack trackInfo;
-      trackInfo.fV.Set( startPoint[0]*0.1, startPoint[1]*0.1, startPoint[2]*0.1 ) ;
-      trackInfo.fP = momentumAtStart ;
-      trackInfo.fSign = 0 ;
-      if (std::numeric_limits<float>::epsilon() < std::fabs(startTrackState->getOmega())) {
-        trackInfo.fSign = static_cast<int>(startTrackState->getOmega() / std::fabs(startTrackState->getOmega()));
-      }
-
-      REX::REvePathMark endPositionMark(REX::REvePathMark::kReference);
-      const auto *endTrackState = lcTrack->getTrackState( EVENT::TrackState::AtLastHit ) ;
-      const auto positionAtEnd = endTrackState->getReferencePoint() ;
-      const auto momentumAtEnd = ComputeMomentum( endTrackState ) ;
-      endPositionMark.fV.Set(positionAtEnd[0]*0.1, positionAtEnd[1]*0.1, positionAtEnd[2]*0.1);
-      endPositionMark.fP = momentumAtEnd ;
-
-      REX::REvePathMark caloPositionMark(REX::REvePathMark::kDecay);
-      const auto *caloTrackState = lcTrack->getTrackState( EVENT::TrackState::AtCalorimeter ) ;
-      const auto positionAtCalo = caloTrackState->getReferencePoint() ;
-      caloPositionMark.fV.Set(positionAtCalo[0]*0.1, positionAtCalo[1]*0.1, positionAtCalo[2]*0.1);
-
-      std::stringstream trkName ;
-      trkName << "Track p=" << momentumAtStart.Mag() << " GeV";
-      std::stringstream trkTitle ;
-      trkTitle << std::string(30, '-') << " Track " << std::string(30, '-') << "\n" ;
-      trkTitle << "Momentum                                            " << FormatReal(momentumAtStart.Mag()) << " GeV\n"
-               << "Charge                                              " << trackInfo.fSign << "\n"
-               << "Type                                                " << lcTrack->getType() << "\n"
-               << "dE/dX                                               " << FormatReal(lcTrack->getdEdx()) << "\n"
-               << "dE/dX error                                         " << FormatReal(lcTrack->getdEdxError()) << "\n"
-               << "Chi2                                                " << FormatReal(lcTrack->getChi2()) << "\n"
-               << "Ndf                                                 " << lcTrack->getNdf() << "\n" ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtOther) ) ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtIP) ) ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtFirstHit) ) ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtLastHit) ) ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtCalorimeter) ) ;
-      trkTitle << GetTrackStateDescription( lcTrack->getTrackState( EVENT::TrackState::AtVertex) ) ;
-
-      auto eveTrack = new REX::REveTrack( &trackInfo, prop ) ;
-      eveTrack->MakeTrack() ;
-      eveTrack->AddPathMark(endPositionMark);
-      eveTrack->AddPathMark(caloPositionMark);
-      // FIXME: The title is not display as tooltip,
-      // so here I set the name as the title to display the tooltip correctly.
-      // When this is fixed we should switch back to SetName( trkName.str() ) ;
-      // eveTrack->SetName( trkName.str() ) ;
-      eveTrack->SetName( trkTitle.str() ) ;
-      eveTrack->SetTitle( trkTitle.str() ) ;
-      eveTrack->SetMainColor( colorIter.NextColor() ) ;
-      eveTrack->SetLineWidth(2);
-      eveTrack->SetPickable(true);
-
+      auto params = lcFactory.ConvertTrack( lcTrack ) ;
+      auto eveTrack = eveFactory.CreateTrack( prop, params ) ;
       eveTrackList->AddElement( eveTrack ) ;
-      index++ ;
     }
-    parent->AddElement( eveTrackList ) ;
-    index++ ;
+    parent->AddElement( eveTrackList.release() ) ;
   }
 
   //--------------------------------------------------------------------------
@@ -279,6 +214,35 @@ namespace lceve {
       index++ ;
     }
     parent->AddElement( eveParticleList ) ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  void LCCollectionConverter::VisualizeVertices( const std::vector<EVENT::Vertex*> &ivertices,
+    const std::string &name,
+    REX::REveElement *parent,
+    ColorIterator &colorIter ) {
+    
+    // get a copy and sort by momentum
+    auto vertices = ivertices ;
+    std::sort( vertices.begin(), vertices.end(), [this](auto lhs, auto rhs) {
+      auto lhsRadius = ROOT::REveVectorT<float>(lhs->getPosition()).R() ;
+      auto rhsRadius = ROOT::REveVectorT<float>(rhs->getPosition()).R() ;
+      return ( rhsRadius > lhsRadius ) ;
+    } ) ;
+
+    LCObjectFactory lcFactory( _eventDisplay ) ;
+    EveElementFactory eveFactory( _eventDisplay ) ;
+    
+    auto eveVertexList = eveFactory.CreateVertexContainer() ;
+    eveVertexList->SetName( name ) ;
+
+    for( auto lcVertex : vertices ) {
+      auto params = lcFactory.ConvertVertex( lcVertex ) ;
+      auto eveVertex = eveFactory.CreateVertex( params ) ;
+      eveVertexList->AddElement( eveVertex ) ;
+    }
+    parent->AddElement( eveVertexList.release() ) ;
   }
 
   //--------------------------------------------------------------------------

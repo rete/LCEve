@@ -66,6 +66,12 @@ namespace lceve {
       const std::string &name,
       REX::REveElement *parent,
       ColorIterator &colorIter ) ;
+      
+    /// Visualize LCIO reco particles.
+    void VisualizeVertices( const std::vector<EVENT::Vertex*> &vertices,
+      const std::string &name,
+      REX::REveElement *parent,
+      ColorIterator &colorIter ) ;
 
   private:
     /// Convert a LCIO collection to a vector of daughter type
