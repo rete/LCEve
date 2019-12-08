@@ -41,7 +41,7 @@ namespace lceve {
     lineAttr.fWidth = 2 ;
     lineAttr.fStyle = 1 ;
     parameters.fLineAttributes = lineAttr ;
-    marker attributes
+    // marker attributes
     MarkerAttributes markerAttr ;
     markerAttr.fColor = color ;
     markerAttr.fSize = 3 ;
