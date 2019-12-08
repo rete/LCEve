@@ -256,10 +256,4 @@ namespace lceve {
     return sstr.str() ;
   }
 
-  class ObjectHelper {
-  public:
-    /// Compute the track momentum from track properties
-    static ROOT::REveVectorT<float> ComputeMomentum( float bfield, float omega, float phi, float tanLambda ) ;
-  };
-
 }
