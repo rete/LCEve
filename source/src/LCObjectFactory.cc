@@ -34,7 +34,7 @@ namespace lceve {
   
   TrackParameters LCObjectFactory::ConvertTrack( const EVENT::Track *const track ) const {
     TrackParameters parameters {} ;
-    auto color = RandomColor( track ) ;
+    auto color = ColorHelper::RandomColor( track ) ;
     // line attributes
     LineAttributes lineAttr ;
     lineAttr.fColor = color ;
@@ -94,7 +94,7 @@ namespace lceve {
     auto p = vertex->getPosition() ;
     parameters.fPosition = ROOT::REveVectorT<float>( p[0]*0.1, p[1]*0.1, p[2]*0.1 ) ;
     LineAttributes attr ;
-    attr.fColor = RandomColor( vertex ) ;
+    attr.fColor = ColorHelper::RandomColor( vertex ) ;
     parameters.fLineAttributes = attr ;
     PropertyMap properties ;
     properties["Algorithm"] = vertex->getAlgorithmType() ;
