@@ -2,7 +2,7 @@
 // -- lceve headers
 #include <LCEve/EventDisplay.h>
 #include <LCEve/EventNavigator.h>
-#include <LCEve/LCCollectionBuilder.h>
+#include <LCEve/EventConverter.h>
 #include <LCEve/Geometry.h>
 #include <LCEve/LCEveConfig.h>
 
@@ -25,12 +25,14 @@ namespace lceve {
     SetName( "EventDisplay" ) ;
     fNavigator = new EventNavigator( this ) ;
     fGeometry = new Geometry( this ) ;
+    fEventConverter = new EventConverter( this ) ; 
   }
 
   //--------------------------------------------------------------------------
 
   EventDisplay::~EventDisplay() {
     if(fApplication) delete fApplication ;
+    delete fEventConverter ;
     delete fNavigator ;
     delete fGeometry ;
   }
@@ -119,6 +121,7 @@ namespace lceve {
     fEveManager = ROOT::REveManager::Create() ;
     fEveManager->GetWorld()->AddElement( this ) ;
 
+    fEventConverter->Init() ;
     /// Load the DD4hep compact file
     fGeometry->LoadCompactFile( compactFileArg.getValue() ) ;
     /// Initialize the LCIO event navigator
@@ -163,8 +166,7 @@ namespace lceve {
     auto scene = GetEveManager()->GetEventScene() ;
     scene->DestroyElements() ;
     // Load new event in event scene
-    LCCollectionConverter converter( this ) ;
-    converter.VisualizeEvent( event, scene ) ;
+    fEventConverter->VisualizeEvent( event, scene ) ;
     /// Send event to clients
     GetEveManager()->EnableRedraw();
     GetEveManager()->DoRedraw3D();

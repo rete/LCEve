@@ -16,6 +16,7 @@ namespace lceve {
 
   class EventNavigator ;
   class Geometry ;
+  class EventConverter ;
 
   /**
    *  @brief  EventDisplay class
@@ -59,6 +60,7 @@ namespace lceve {
     ROOT::REveManager                *fEveManager {nullptr} ;
     EventNavigator                   *fNavigator {nullptr} ;
     Geometry                         *fGeometry {nullptr} ;
+    EventConverter                   *fEventConverter {nullptr} ;
     Settings                          fSettings {} ;
 
     ClassDef( EventDisplay, 0 ) ;
