@@ -28,14 +28,14 @@ namespace lceve {
     virtual ~ICollectionConverter() = default ;
     
     /// Callback function to process a LCIO LCCollection
-    virtual void ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) = 0 ;
+    virtual ROOT::REveElement* ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) = 0 ;
     
     /// Set the event display instance and input parameters
     void Initialize( EventDisplay *lceve, ParameterMap_t parameters ) ;
     
   protected:
-    /// Get the eve manager
-    ROOT::REveManager *GetEveManager() const ;
+    /// Get the event display
+    EventDisplay *GetEventDisplay() const ;
     
     /// Get a parameter
     template <typename T>
@@ -58,11 +58,8 @@ namespace lceve {
   
   //--------------------------------------------------------------------------
   
-  inline ROOT::REveManager *ICollectionConverter::GetEveManager() const {
-    if( nullptr == fEventDisplay ) {
-      return nullptr ;
-    }
-    return fEventDisplay->GetEveManager() ;
+  inline EventDisplay *ICollectionConverter::GetEventDisplay() const {
+    return fEventDisplay ;
   }
   
   //--------------------------------------------------------------------------
