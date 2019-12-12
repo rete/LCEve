@@ -1,20 +1,27 @@
 #pragma once
 
+// -- std headers
 #include <type_traits>
 #include <vector>
 
+// -- lcio headers
 #include <EVENT/LCCollection.h>
 #include <EVENT/LCObject.h>
 #include <EVENT/LCIO.h>
 
+// -- lceve headers
 #include <LCEve/HelixClass.h>
 
+// -- root headers
 #include <ROOT/REveTrackPropagator.hxx>
 
 namespace lceve {
   
+  /// LCIOHelper class
+  /// Helper class dealing with LCIO objects
   class LCIOHelper {
   public:
+    /// Convert the LCIO collection to a vector. More convienient for sorting and looping
     template <typename T, typename = typename std::enable_if<std::is_base_of<EVENT::LCObject,T>::value>::type >
     static std::vector<T*> CollectionAsVector( const EVENT::LCCollection *const collection ) {
       std::vector<T*> vec ;
