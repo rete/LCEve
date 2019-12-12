@@ -40,38 +40,38 @@ namespace lceve {
     /// Load the LCIO event in the Eve scene
     void VisualizeEvent( const EVENT::LCEvent *event, REX::REveScene *scene ) ;
 
-    /// Visualize LCIO tracks. Can be extract from a collection or can be
-    /// a sub-list of any object, e.g ReconstructedParticle
-    void VisualizeTracks( const std::vector<EVENT::Track*> &tracks,
-      const std::string &name,
-      REX::REveElement *parent,
-      ColorIterator &colorIter ) ;
-
-    /// Visualize LCIO calorimeter hits. Can be extract from a collection or can be
-    /// a sub-list of any object, e.g Cluster
-    void VisualizeCaloHits( const std::vector<EVENT::CalorimeterHit*> &caloHits,
-      const std::string &name,
-      REX::REveElement *parent,
-      ColorIterator &colorIter ) ;
-
-    /// Visualize LCIO clusters. Can be extract from a collection or can be
-    /// a sub-list of any object, e.g ReconstructedParticle
-    void VisualizeClusters( const std::vector<EVENT::Cluster*> &clusters,
-      const std::string &name,
-      REX::REveElement *parent,
-      ColorIterator &colorIter ) ;
-
-    /// Visualize LCIO reco particles.
-    void VisualizeRecoParticles( const std::vector<EVENT::ReconstructedParticle*> &particles,
-      const std::string &name,
-      REX::REveElement *parent,
-      ColorIterator &colorIter ) ;
-      
-    /// Visualize LCIO reco particles.
-    void VisualizeVertices( const std::vector<EVENT::Vertex*> &vertices,
-      const std::string &name,
-      REX::REveElement *parent,
-      ColorIterator &colorIter ) ;
+    // /// Visualize LCIO tracks. Can be extract from a collection or can be
+    // /// a sub-list of any object, e.g ReconstructedParticle
+    // void VisualizeTracks( const std::vector<EVENT::Track*> &tracks,
+    //   const std::string &name,
+    //   REX::REveElement *parent,
+    //   ColorIterator &colorIter ) ;
+    // 
+    // /// Visualize LCIO calorimeter hits. Can be extract from a collection or can be
+    // /// a sub-list of any object, e.g Cluster
+    // void VisualizeCaloHits( const std::vector<EVENT::CalorimeterHit*> &caloHits,
+    //   const std::string &name,
+    //   REX::REveElement *parent,
+    //   ColorIterator &colorIter ) ;
+    // 
+    // /// Visualize LCIO clusters. Can be extract from a collection or can be
+    // /// a sub-list of any object, e.g ReconstructedParticle
+    // void VisualizeClusters( const std::vector<EVENT::Cluster*> &clusters,
+    //   const std::string &name,
+    //   REX::REveElement *parent,
+    //   ColorIterator &colorIter ) ;
+    // 
+    // /// Visualize LCIO reco particles.
+    // void VisualizeRecoParticles( const std::vector<EVENT::ReconstructedParticle*> &particles,
+    //   const std::string &name,
+    //   REX::REveElement *parent,
+    //   ColorIterator &colorIter ) ;
+    // 
+    // /// Visualize LCIO reco particles.
+    // void VisualizeVertices( const std::vector<EVENT::Vertex*> &vertices,
+    //   const std::string &name,
+    //   REX::REveElement *parent,
+    //   ColorIterator &colorIter ) ;
 
   private:
     /// Convert a LCIO collection to a vector of daughter type
