@@ -36,10 +36,10 @@ namespace lceve {
       // Create the track
       auto eveTrack = std::make_unique<EveTrack>( &trackInfo, propagator ) ;
       eveTrack->MakeTrack() ;
-      auto defColor = RandomColor( eveTrack.get() ) ;  
+      auto defColor = ColorHelper::RandomColor( eveTrack.get() ) ;  
       if( parameters.fMarkerAttributes ) {
         auto attr = parameters.fMarkerAttributes.value() ;
-        eveTrack->SetMarkerColor( attr.fColor.value_or( RandomColor( eveTrack.get() ) ) ) ;
+        eveTrack->SetMarkerColor( attr.fColor.value_or( ColorHelper::RandomColor( eveTrack.get() ) ) ) ;
         if( attr.fSize ) {
           eveTrack->SetMarkerSize( attr.fSize.value() ) ;
         }
@@ -106,7 +106,7 @@ namespace lceve {
       auto position = parameters.fPosition.value() ;
       // set vertex position
       eveVertex->RefMainTrans().SetPos( position.Arr() ) ;
-      auto defColor = RandomColor( eveVertex.get() ) ;
+      auto defColor = ColorHelper::RandomColor( eveVertex.get() ) ;
       // Set line attributes
       LineAttributes defAttr ;
       defAttr.fColor = defColor ; defAttr.fWidth = 2 ;
@@ -164,7 +164,7 @@ namespace lceve {
   EveCluster *EveElementFactory::CreateCluster( const ClusterParameters &parameters ) const {
     try {
       auto eveCluster = std::make_unique<EveCluster>() ;
-      auto defColor = RandomColor( eveCluster.get() ) ;
+      auto defColor = ColorHelper::RandomColor( eveCluster.get() ) ;
       MarkerAttributes defAttr ;
       defAttr.fColor = defColor ; defAttr.fSize = 3 ; defAttr.fStyle = 4 ;
       auto attr = parameters.fMarkerAttributes.value_or( defAttr ) ;
@@ -278,10 +278,10 @@ namespace lceve {
       // Create the MC particle track
       auto eveMCParticle = std::make_unique<EveMCParticle>( &eveMCTrack, propagator ) ;
       eveMCParticle->MakeTrack() ;
-      auto defColor = RandomColor( eveMCParticle.get() ) ;  
+      auto defColor = ColorHelper::RandomColor( eveMCParticle.get() ) ;  
       if( parameters.fMarkerAttributes ) {
         auto attr = parameters.fMarkerAttributes.value() ;
-        eveMCParticle->SetMarkerColor( attr.fColor.value_or( RandomColor( eveMCParticle.get() ) ) ) ;
+        eveMCParticle->SetMarkerColor( attr.fColor.value_or( ColorHelper::RandomColor( eveMCParticle.get() ) ) ) ;
         if( attr.fSize ) {
           eveMCParticle->SetMarkerSize( attr.fSize.value() ) ;
         }
