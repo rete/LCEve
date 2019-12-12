@@ -11,6 +11,9 @@ project(
   LANGUAGES CXX
 )
 
+# For DD4hep macros
+set( PackageName LCEve )
+
 include( GNUInstallDirs )
 
 ### DEPENDENCIES ############################################################
@@ -67,20 +70,21 @@ include_directories( source/include )
 #
 # LCEve library compilation
 aux_source_directory( source/src library_sources )
+root_generate_dictionary( G__LCEve 
+  LCEve/EventNavigator.h
+  LCEve/EventDisplay.h
+  LCEve/IEventNavigator.h 
+  LINKDEF source/include/LinkDef.h 
+)
+list(APPEND library_sources G__LCEve.cxx)
 add_library( LCEve_lib SHARED ${library_sources} )
 set_target_properties( LCEve_lib PROPERTIES OUTPUT_NAME LCEve )
 install( TARGETS LCEve_lib LIBRARY )
-set( LINKDEF_FILE source/include/LinkDef.h )
-set( DICTIONARY_HEADERS
-  LCEve/EventNavigator.h
-  LCEve/EventDisplay.h
-  LCEve/IEventNavigator.h
-)
-root_generate_dictionary(
-  LCEveDict ${DICTIONARY_HEADERS}
-  MODULE LCEve_lib
-  LINKDEF ${LINKDEF_FILE}
-)
+
+# LCEvePlugins DD4hep plugin library
+aux_source_directory( source/plugins plugin_sources )
+add_dd4hep_plugin( LCEvePlugins SHARED ${plugin_sources} )
+target_link_libraries( LCEvePlugins LCEve_lib )
 
 # LCEventDisplay executable compilation
 add_executable( LCEventDisplay_bin source/main/LCEventDisplay.cc )
@@ -98,6 +102,9 @@ install( TARGETS LCGeomViewer_bin RUNTIME )
 if( NOT "${CMAKE_INSTALL_PREFIX}" STREQUAL "${PROJECT_SOURCE_DIR}" )
   install( DIRECTORY ui5 DESTINATION . )
 endif()
+
+# Create a thislceve.sh loading our plugin library(ies)
+dd4hep_instantiate_package( lceve )
 
 # display some variables and write them to cache
 display_std_variables()
