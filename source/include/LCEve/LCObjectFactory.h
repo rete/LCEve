@@ -60,20 +60,8 @@ namespace lceve {
     
     // TODO Tracker Hit, etc ...
     
-    /// Guess the color from the object address
-    template <typename T>
-    static Int_t GuessColor( const T *const ptr ) ;
-    
   private:     
     EventDisplay          *fEventDisplay {nullptr} ;
   };
-  
-  
-  template <typename T>
-  inline Int_t LCObjectFactory::GuessColor( const T *const ptr ) {
-    static const std::vector<Int_t> colors {colorList} ;
-    auto addr = reinterpret_cast<std::size_t>( ptr ) ;
-    return colors[addr % colorList.size()] ;
-  }
     
 }
