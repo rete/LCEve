@@ -1,41 +1,54 @@
 #pragma once
 
+// -- root headers
 #include <TColor.h>
+
+// -- std headers
 #include <vector>
+#include <optional>
+#include <functional>
 
 namespace lceve {
+  
+  using ColorType_t = Int_t ;
+  using ColorList_t = std::vector<ColorType_t> ;
+  using ColorNameList_t = std::vector<std::string> ;
 
-  using ColorType = int ;
-  using ColorList = std::initializer_list<int> ;
-
-  /// A predefined list of colors to iterate over
-  constexpr ColorList colorList = {
-    // Standard colors
-    kRed, kGreen, kBlue, kMagenta, kCyan, kViolet, kPink,
-    kOrange, kYellow, kSpring, kTeal, kAzure, kGray,
-    // Dark colors
-    kRed+2, kGreen+2, kBlue+2, kMagenta+2, kCyan+2,
-    kViolet+2, kPink+2, kOrange+2, kYellow+2,
-    // Bright colors
-    kGreen-9, kBlue-9, kRed-9, kMagenta-9, kCyan-9,
-    kViolet-9, kPink-9, kOrange-9, kYellow-9
+  /// ColorHelper class
+  /// A set of helper functions dealing with ROOT colors
+  class ColorHelper {
+  public:
+    /// A predefined list of colors to iterate over
+    static const ColorList_t fgPredefinedColors ;
+    
+    /// Same as above but by corresponding string names 
+    static const ColorNameList_t fgPredefinedColorNames ;
+    
+    /// Color functor iterator
+    using Function_t = std::function<ColorType_t()> ;
+    
+    /// Find the corresponding color number in the ROOT color palette
+    /// Allowed parameters:
+    ///  - a predefined color name (see above). Example: "red"
+    ///  - an hexadecimal color code. Example: "#c0c0c0"
+    ///  - a list of 3 integers, comma separated "r,g,b". Example: "125,255,255"
+    /// Returns std::nullopt_t if not matching any of the options listed above
+    static std::optional<ColorType_t> GetColor( const std::string &color ) ;
+    
+    /// Get a color generator function. Possible cases:
+    ///   - "iter" : the functor will generate a new color from the predefined color list
+    ///   - anything else that GetColor() can parse: the functor will always return the same color
+    ///   - else: null functor 
+    static Function_t GetColorFunction( const std::string &color ) ;
+    
+    /// Get a random color based on the memory address of the object
+    template <typename T>
+    inline static Int_t RandomColor( const T *const ptr ) {
+      auto addr = reinterpret_cast<std::size_t>( ptr ) ;
+      return fgPredefinedColors[addr % fgPredefinedColors.size()] ;
+    }
   };
   
-  /// Get a random color based on the memory address of the object
-  template <typename T>
-  inline static Int_t RandomColor( const T *const ptr ) {
-    static const std::vector<Int_t> colors {colorList} ;
-    auto addr = reinterpret_cast<std::size_t>( ptr ) ;
-    return colors[addr % colorList.size()] ;
-  }
-
-  enum class ColorIterStrategy {
-    /// Always return the same color
-    FIXED_COLOR,
-    /// Iterate over the color table
-    AUTO_ITER
-  };
-
   /**
    *  @brief  ColorIterator class
    *  Helper class to iterate over colors
@@ -43,30 +56,20 @@ namespace lceve {
   class ColorIterator {
   public:
     /// Constructor
-    ColorIterator() ;
-
+    ColorIterator() = default ;
+    ColorIterator( ColorIterator && ) = default ;
+    ColorIterator( const ColorIterator & ) = default ;
     /// Default destructor
     ~ColorIterator() = default ;
-
-    /// Constructor with strategy and color
-    /// If the startegy is "fixed", the second argument is the fixed color
-    /// If the startegy is "auto", the color is the start color in the color table
-    ColorIterator( ColorIterStrategy strategy, int color = *colorList.begin() ) ;
-
+    
     /// Increment the color iterator and return the new color
-    int NextColor() ;
+    ColorType_t NextColor() ;
 
     /// Get the current color
-    int CurrentColor() const ;
-
-    /// Fixed color accessor
-    int FixedColor() const ;
+    ColorType_t CurrentColor() const ;
 
   private:
-    ColorIterStrategy             _strategy { ColorIterStrategy::AUTO_ITER } ;
-    std::vector<int>              _colors = colorList ;
-    std::vector<int>::iterator    _colorIter { _colors.begin() } ;
-    int                           _fixedColor {1} ;
+    ColorList_t::const_iterator    fCurrentColor { ColorHelper::fgPredefinedColors.begin() } ;
   };
-
+  
 }
