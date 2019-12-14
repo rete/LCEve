@@ -34,7 +34,7 @@ namespace lceve {
     }
     std::cout << "Converting track collection " << name << std::endl ;
     auto tracks = LCIOHelper::CollectionAsVector<EVENT::Track>( collection ) ;
-    auto color = GetParameter<std::string>( "color" ).value_or( "iter" ) ;
+    auto color = GetParameter<std::string>( "Color" ).value_or( "iter" ) ;
     auto colorFunctor = ColorHelper::GetColorFunction( color ) ;
     
     std::sort( tracks.begin(), tracks.end(), [this](auto lhs, auto rhs) {
