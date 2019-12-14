@@ -25,7 +25,7 @@ set( USE_CXX11 OFF )
 include( ilcsoft_default_settings )
 if( NOT CMAKE_CXX_STANDARD )
   # minimum standard required
-  set( CMAKE_CXX_STANDARD 14 )
+  set( CMAKE_CXX_STANDARD 17 )
 endif()
 
 set( ROOT_COMPONENTS EG ROOTEve ROOTWebDisplay )
