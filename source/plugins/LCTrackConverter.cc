@@ -55,6 +55,9 @@ namespace lceve {
 
     for( auto lcTrack : tracks ) {
       auto params = lcFactory.ConvertTrack( lcTrack ) ;
+      auto attr = params.fLineAttributes.value_or( LineAttributes {} ) ;
+      attr.fColor = colorFunctor() ;
+      params.fLineAttributes = attr ;
       auto eveTrack = eveFactory.CreateTrack( propagator, params ) ;
       eveTrackList->AddElement( eveTrack ) ;
     }
