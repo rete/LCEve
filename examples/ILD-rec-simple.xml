@@ -5,8 +5,8 @@
     <parameter name="SortPolicy"> Momentum </parameter>
   </collection>
   
-  <!-- <collection name="PandoraPFOs" plugin="LCParticleConverter">
-    <parameter name="Color"> iter </parameter>
-  </collection> -->
+  <collection name="PrimaryVertex" plugin="LCVertexConverter">
+    <parameter name="Color"> blue </parameter>
+  </collection> 
   
 </lceve>
