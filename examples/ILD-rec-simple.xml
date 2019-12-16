@@ -1,0 +1,12 @@
+<lceve>
+  
+  <collection name="MarlinTrkTracks" plugin="LCTrackConverter">
+    <parameter name="Color"> iter </parameter>
+    <parameter name="SortPolicy"> Momentum </parameter>
+  </collection>
+  
+  <!-- <collection name="PandoraPFOs" plugin="LCParticleConverter">
+    <parameter name="Color"> iter </parameter>
+  </collection> -->
+  
+</lceve>
