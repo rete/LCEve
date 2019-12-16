@@ -12,6 +12,8 @@ namespace EVENT {
   class LCEvent ;
 }
 
+class TiXmlElement ;
+
 namespace lceve {
   
   class EventDisplay ;
@@ -32,7 +34,7 @@ namespace lceve {
     
     /// Initialize the event converter.
     /// Create and configure the collection converter plugins
-    void Init() ;
+    void Init( const TiXmlElement *element ) ;
     
     /// Load the event in the Eve event scene
     void VisualizeEvent( const EVENT::LCEvent *const event, ROOT::REveScene *eventScene ) ;
