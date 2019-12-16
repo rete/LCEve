@@ -2,6 +2,7 @@
 #include <LCEve/EventConverter.h>
 #include <LCEve/ICollectionConverter.h>
 #include <LCEve/EventDisplay.h>
+#include <LCEve/XMLHelper.h>
 
 // -- lcio headers
 #include <EVENT/LCEvent.h>
@@ -21,16 +22,22 @@ namespace lceve {
   
   //--------------------------------------------------------------------------
   
-  void EventConverter::Init() {
-    std::string pluginName = "LCTrackConverter" ;
-    auto converter = dd4hep::PluginService::Create<ICollectionConverter*>( pluginName ) ;
-    std::cout << "Created plugin instance " << pluginName << " from DD4hep: " << (void*)converter << std::endl ;
-    if( nullptr == converter ) {
-      throw std::runtime_error( "DD4hep collection converter plugin '" + pluginName + "' not found !" ) ;
+  void EventConverter::Init( const TiXmlElement *element ) {
+    
+    CollectionConfigList_t colsConfig {} ;
+    XMLHelper::ReadCollectionsConfig( element, colsConfig ) ;
+    
+    for( auto &c : colsConfig ) {
+      auto converter = dd4hep::PluginService::Create<ICollectionConverter*>( c.fPluginName ) ;
+      std::cout << "Created plugin instance " << c.fPluginName << " from DD4hep: " << (void*)converter << std::endl ;
+      if( nullptr == converter ) {
+        throw std::runtime_error( "DD4hep collection converter plugin '" + c.fPluginName + "' not found !" ) ;
+      }
+      converter->Initialize( fEventDisplay, c.fParameters ) ;
+      std::shared_ptr<ICollectionConverter> converterPtr( converter ) ;
+      fConverters.insert( {c.fName, std::move(converterPtr)} ) ;       
     }
-    converter->Initialize( fEventDisplay, {} ) ;
-    std::shared_ptr<ICollectionConverter> converterPtr( converter ) ;
-    fConverters.insert( {"MarlinTrkTracks", std::move(converterPtr)} ) ;      
+     
   }
   
   //--------------------------------------------------------------------------
