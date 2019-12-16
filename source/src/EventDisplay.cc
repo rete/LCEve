@@ -17,6 +17,9 @@
 // -- lcio headers
 #include <EVENT/LCEvent.h>
 
+// -- tinyxml headers
+#include <tinyxml.h>
+
 ClassImp( lceve::EventDisplay )
 
 namespace lceve {
@@ -80,18 +83,14 @@ namespace lceve {
     TCLAP::ValueArg<std::string> compactFileArg( "g", "geometry",
       "The DD4hep geometry compact file", true, "", "string") ;
     cmd.add( compactFileArg ) ;
-
-    TCLAP::MultiArg<std::string> readColNamesArg( "c", "lcio-collections",
-      "The list of LCIO collection to read only", false, "vector<string>") ;
-    cmd.add( readColNamesArg ) ;
+    
+    TCLAP::ValueArg<std::string> configArg( "c", "config",
+      "The event display config file name", true, "", "string") ;
+    cmd.add( configArg ) ;    
 
     TCLAP::SwitchArg serverModeArg( "s", "server-mode",
       "Whether to run in server mode. Do not show any window on startup but the url only", false) ;
     cmd.add( serverModeArg ) ;
-
-    TCLAP::SwitchArg dstModeArg( "d", "dst-mode",
-      "Whether to display LCIO event in DST mode. Draw only reconstructed quantities with dedicated display", false) ;
-    cmd.add( dstModeArg ) ;
 
     TCLAP::ValueArg<int> portArg( "p", "port",
       "The http port to use", false, 0, "int") ;
@@ -104,11 +103,7 @@ namespace lceve {
     cmd.parse( argc, argv ) ;
 
     /// Fill the application settings with parsed values
-    if( readColNamesArg.isSet() ) {
-      fSettings.SetReadCollectionNames( readColNamesArg.getValue() ) ;
-    }
     fSettings.SetServerMode( serverModeArg.getValue() ) ;
-    fSettings.SetDSTMode( dstModeArg.getValue() ) ;
     fSettings.SetDetectorLevel( detectorLevelArg.getValue() ) ;
     if( portArg.isSet() ) {
       gEnv->SetValue( "WebGui.HttpPort", portArg.getValue() ) ;
@@ -120,8 +115,19 @@ namespace lceve {
     /// Create the Eve manager
     fEveManager = ROOT::REveManager::Create() ;
     fEveManager->GetWorld()->AddElement( this ) ;
+    
+    TiXmlDocument document ;
+    bool loadOkay = document.LoadFile( configArg.getValue() ) ;
+    if( !loadOkay ) {
+      std::stringstream str ;
+      str  << "XMLParser::parse error in file [" << configArg.getValue()
+          << ", row: " << document.ErrorRow() << ", col: " << document.ErrorCol() << "] : "
+          << document.ErrorDesc() ;
+      throw std::runtime_error( str.str() ) ;
+    }
+    auto root = document.RootElement() ;
 
-    fEventConverter->Init() ;
+    fEventConverter->Init( root ) ;
     /// Load the DD4hep compact file
     fGeometry->LoadCompactFile( compactFileArg.getValue() ) ;
     /// Initialize the LCIO event navigator
