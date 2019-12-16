@@ -21,6 +21,12 @@ namespace lceve {
   /// Helper class dealing with LCIO objects
   class LCIOHelper {
   public:
+    /// std::sort lambda functions
+    template <typename T>
+    using SortFunction_t = std::function<bool( const T *, const T * )> ;
+    template <typename T>
+    using SortFunctionMap_t = std::map<std::string, SortFunction_t<T>> ;
+    
     /// Convert the LCIO collection to a vector. More convienient for sorting and looping
     template <typename T, typename = typename std::enable_if<std::is_base_of<EVENT::LCObject,T>::value>::type >
     static std::vector<T*> CollectionAsVector( const EVENT::LCCollection *const collection ) {
