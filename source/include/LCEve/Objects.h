@@ -187,6 +187,9 @@ namespace lceve {
     std::optional<std::vector<TrackParameters>>        fTracks {} ;
     /// The list of cluster
     std::optional<std::vector<ClusterParameters>>      fClusters {} ;
+    /// If this color attibute is set, it will replace
+    /// the color of all tracks and clusters
+    std::optional<Color_t>                             fColor {} ;    
     /// Additional particle properties
     PropertyMap                                        fProperties {} ;
   };
