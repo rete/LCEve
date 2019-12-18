@@ -1,6 +1,63 @@
-<lceve>
+<lceve>  
+  <!-- ECal hits -->
+  <collection name="EcalBarrelCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection>   
+  <collection name="EcalEndcapsCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection> 
+  <collection name="EcalEndcapRingCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection>
   
-  <collection name="MarlinTrkTracks" plugin="LCTrackConverter">
+  <!-- HCal hits -->
+  <collection name="HcalBarrelCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection> 
+  <collection name="HcalEndcapsCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection> 
+  <collection name="HcalEndcapRingCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 6 </parameter>
+  </collection>
+  
+  <!-- Forward calorimeters -->
+  <collection name="BCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  <collection name="LCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  <collection name="LHCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  
+  <!-- Muon system -->
+  <collection name="MUON" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> darkYellow </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  
+  <!-- <collection name="MarlinTrkTracks" plugin="LCTrackConverter">
     <parameter name="Color"> iter </parameter>
     <parameter name="SortPolicy"> Momentum </parameter>
   </collection>
@@ -17,27 +74,6 @@
   <collection name="PandoraPFOs" plugin="LCRecoParticleConverter">
     <parameter name="Color"> iter </parameter>
     <parameter name="SortPolicy"> Energy </parameter>
-  </collection> 
-  
-  <!-- Forward calorimeters -->
-  <collection name="BCAL" plugin="LCCaloHitConverter">
-    <parameter name="Color"> red </parameter>
-    <parameter name="SortPolicy"> Energy </parameter>
-  </collection> 
-  <collection name="LCAL" plugin="LCCaloHitConverter">
-    <parameter name="Color"> red </parameter>
-    <parameter name="SortPolicy"> Energy </parameter>
-  </collection> 
-  <collection name="LHCAL" plugin="LCCaloHitConverter">
-    <parameter name="Color"> red </parameter>
-    <parameter name="SortPolicy"> Energy </parameter>
-  </collection> 
-  
-  <!-- Muon system -->
-  <collection name="MUON" plugin="LCCaloHitConverter">
-    <parameter name="Color"> darkYellow </parameter>
-    <parameter name="SortPolicy"> Energy </parameter>
-    <parameter name="MarkerSize"> 8 </parameter>
-  </collection> 
+  </collection>  -->
   
 </lceve>
