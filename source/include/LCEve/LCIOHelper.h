@@ -49,6 +49,16 @@ namespace lceve {
       helix.Initialize_Canonical( trk->getPhi(), trk->getD0(), trk->getZ0(), trk->getOmega(), trk->getTanLambda(), bfield ) ;
       return ROOT::REveVector( helix.getMomentum() ) ;  
     }
+    
+    template <typename T>
+    static float GetEnergy( const T *hit ) {
+      return hit->getEnergy() ;
+    }
   };
+  
+  template <>
+  static float LCIOHelper::GetEnergy( const EVENT::RawCalorimeterHit *hit ) {
+    return hit->getAmplitude() ;
+  }
   
 }
