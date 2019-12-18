@@ -57,7 +57,7 @@ namespace lceve {
   };
   
   template <>
-  static float LCIOHelper::GetEnergy( const EVENT::RawCalorimeterHit *hit ) {
+  inline float LCIOHelper::GetEnergy( const EVENT::RawCalorimeterHit *hit ) {
     return hit->getAmplitude() ;
   }
   
