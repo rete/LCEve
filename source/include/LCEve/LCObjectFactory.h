@@ -40,18 +40,18 @@ namespace lceve {
     /// Convert a LCIO vertex object
     VertexParameters ConvertVertex( const EVENT::Vertex *const vertex ) const ;
     
-    // /// Convert a LCIO calo hit object
-    // CaloHitParameters ConvertCaloHit( const EVENT::CalorimeterHit *const caloHit ) const ;
-    // 
+    /// Convert LCIO calo hits object
+    std::vector<CaloHitParameters> ConvertCaloHits( const std::vector<EVENT::CalorimeterHit *> &caloHits ) const ;
+    
     // /// Convert a LCIO sim calo hit object
     // CaloHitParameters ConvertCaloHit( const EVENT::SimCalorimeterHit *const caloHit ) const ;
-    // 
-    // /// Convert a LCIO cluster object
-    // ClusterParameters ConvertCluster( const EVENT::Cluster *const cluster ) const ;
-    // 
-    // /// Convert a LCIO reco particle object
-    // RecoParticleParameters ConvertRecoParticle( const EVENT::ReconstructedParticle *const recoParticle ) const ;
-    // 
+    
+    /// Convert a LCIO cluster object
+    ClusterParameters ConvertCluster( const EVENT::Cluster *const cluster ) const ;
+    
+    /// Convert a LCIO reco particle object
+    RecoParticleParameters ConvertRecoParticle( const EVENT::ReconstructedParticle *const recoParticle ) const ;
+    
     // /// Convert a LCIO jet (reco particle) object
     // JetParameters ConvertJet( const EVENT::ReconstructedParticle *const jet ) const ;
     

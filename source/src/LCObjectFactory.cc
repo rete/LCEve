@@ -105,4 +105,66 @@ namespace lceve {
     return parameters ;
   }
   
+  //--------------------------------------------------------------------------
+  
+  std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::CalorimeterHit *> &caloHits ) const {
+    if( caloHits.empty() ) {
+      return {} ;
+    }
+    std::vector<CaloHitParameters> parametersList {} ;
+    parametersList.reserve( caloHits.size() ) ;
+    auto color = ColorHelper::RandomColor( *caloHits.begin() ) ;
+    for( auto &caloHit : caloHits ) {
+      CaloHitParameters parameters {} ;
+      auto pos = caloHit->getPosition() ;
+      parameters.fPosition = ROOT::REveVectorT<float>( pos[0]*0.1, pos[1]*0.1, pos[2]*0.1 ) ;
+      parameters.fColor = color ;
+      parameters.fAmplitude = caloHit->getEnergy() ;
+      parametersList.push_back( parameters ) ;
+    }
+    return parametersList ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  ClusterParameters LCObjectFactory::ConvertCluster( const EVENT::Cluster *const cluster ) const {
+    ClusterParameters parameters {} ;
+    auto color = ColorHelper::RandomColor( cluster ) ;
+    MarkerAttributes attr {} ;
+    attr.fColor = color ; attr.fSize = 3 ; attr.fStyle = 4 ;
+    parameters.fMarkerAttributes = attr ;
+    parameters.fEnergy = cluster->getEnergy() ;
+    parameters.fCaloHits = this->ConvertCaloHits( cluster->getCalorimeterHits() ) ;
+    return parameters ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  RecoParticleParameters LCObjectFactory::ConvertRecoParticle( const EVENT::ReconstructedParticle *const recoParticle ) const {
+    RecoParticleParameters parameters {} ;
+    parameters.fEnergy = recoParticle->getEnergy() ;
+    parameters.fMomentum = ROOT::REveVectorT<float>( recoParticle->getMomentum() ) ;
+    parameters.fMass = recoParticle->getMass() ;
+    parameters.fColor = ColorHelper::RandomColor( recoParticle ) ;
+    auto &tracks = recoParticle->getTracks() ;
+    if( not tracks.empty() ) {
+      std::vector<TrackParameters> trackParams {} ;
+      trackParams.reserve( tracks.size() ) ;
+      for( auto &trk : tracks ) {
+        trackParams.push_back( this->ConvertTrack( trk ) ) ;
+      }
+      parameters.fTracks = trackParams ;
+    }
+    auto &clusters = recoParticle->getClusters() ;
+    if( not clusters.empty() ) {
+      std::vector<ClusterParameters> clusterParams {} ;
+      clusterParams.reserve( clusters.size() ) ;
+      for( auto &cl : clusters ) {
+        clusterParams.push_back( this->ConvertCluster( cl ) ) ;
+      }
+      parameters.fClusters = clusterParams ;
+    }
+    return parameters ;
+  }
+    
 }
