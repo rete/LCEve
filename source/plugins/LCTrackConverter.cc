@@ -66,7 +66,6 @@ namespace lceve {
       std::cout << "ERROR: Expected collection type EVENT::LCIO::TRACK, got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    std::cout << "Converting track collection " << name << std::endl ;
     auto tracks = LCIOHelper::CollectionAsVector<EVENT::Track>( collection ) ;
     
     // Track coloring

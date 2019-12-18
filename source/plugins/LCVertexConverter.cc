@@ -61,7 +61,6 @@ namespace lceve {
       std::cout << "ERROR: Expected collection type EVENT::LCIO::VERTEX, got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    std::cout << "Converting vertex collection " << name << std::endl ;
     auto vertexs = LCIOHelper::CollectionAsVector<EVENT::Vertex>( collection ) ;
     
     // Vertex coloring
