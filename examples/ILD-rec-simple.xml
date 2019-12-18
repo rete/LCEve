@@ -19,4 +19,25 @@
     <parameter name="SortPolicy"> Energy </parameter>
   </collection> 
   
+  <!-- Forward calorimeters -->
+  <collection name="BCAL" plugin="LCCaloHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+  </collection> 
+  <collection name="LCAL" plugin="LCCaloHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+  </collection> 
+  <collection name="LHCAL" plugin="LCCaloHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+  </collection> 
+  
+  <!-- Muon system -->
+  <collection name="MUON" plugin="LCCaloHitConverter">
+    <parameter name="Color"> darkYellow </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 8 </parameter>
+  </collection> 
+  
 </lceve>
