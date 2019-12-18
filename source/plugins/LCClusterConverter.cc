@@ -52,7 +52,6 @@ namespace lceve {
       std::cout << "ERROR: Expected collection type EVENT::LCIO::CLUSTER, got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    std::cout << "Converting cluster collection " << name << std::endl ;
     auto clusters = LCIOHelper::CollectionAsVector<EVENT::Cluster>( collection ) ;
     
     // Cluster coloring
