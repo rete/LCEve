@@ -58,7 +58,6 @@ namespace lceve {
       std::cout << "ERROR: Expected collection type EVENT::LCIO::RECONSTRUCTEDPARTICLE, got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    std::cout << "Converting reco particle collection " << name << std::endl ;
     auto particles = LCIOHelper::CollectionAsVector<EVENT::ReconstructedParticle>( collection ) ;
     
     // Particle coloring
