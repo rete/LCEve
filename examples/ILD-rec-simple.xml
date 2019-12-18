@@ -9,4 +9,14 @@
     <parameter name="Color"> blue </parameter>
   </collection> 
   
+  <collection name="PandoraClusters" plugin="LCClusterConverter">
+    <parameter name="Color"> iter </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+  </collection>
+  
+  <collection name="PandoraPFOs" plugin="LCRecoParticleConverter">
+    <parameter name="Color"> iter </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+  </collection> 
+  
 </lceve>
