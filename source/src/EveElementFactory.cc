@@ -200,7 +200,6 @@ namespace lceve {
   EveRecoParticle *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &parameters ) const {
     try {
       auto eveParticle = std::make_unique<EveRecoParticle>() ;
-            
       // Add tracks if any
       if( parameters.fTracks ) {
         auto tracks = parameters.fTracks.value() ;
@@ -210,12 +209,16 @@ namespace lceve {
         // Create propagator and tracks
         auto propagator = fEventDisplay->GetGeometry()->CreateTrackPropagator() ;
         for( auto &trk : tracks ) {
+          if( parameters.fColor.has_value() ) {
+            auto attr = trk.fLineAttributes.value_or( LineAttributes() ) ;
+            attr.fColor = parameters.fColor.value() ;
+            trk.fLineAttributes = attr ;
+          }
           eveTracks->AddElement( this->CreateTrack( propagator, trk ) ) ;
         }
         eveParticle->AddElement( eveTracks.release() ) ;
       }
-      
-      // Add tracks if any
+      // Add cluster if any
       if( parameters.fClusters ) {
         auto clusters = parameters.fClusters.value() ;
         auto eveClusters = this->CreateClusterContainer() ;
@@ -223,19 +226,21 @@ namespace lceve {
         eveClusters->SetName( clustersName ) ;
         // Create clusters
         for( auto &cl : clusters ) {
+          if( parameters.fColor.has_value() ) {
+            auto attr = cl.fMarkerAttributes.value_or( MarkerAttributes() ) ;
+            attr.fColor = parameters.fColor.value() ;
+            cl.fMarkerAttributes = attr ;
+          }
           eveClusters->AddElement( this->CreateCluster( cl ) ) ;
         }
         eveParticle->AddElement( eveClusters.release() ) ;
       }      
-
       auto mom = parameters.fMomentum.value() ;
       auto energy = parameters.fEnergy.value() ;
-      
       // Particle name
       std::stringstream particleName ;
       particleName << "PFO E=" << parameters.fEnergy.value() << " GeV" ;
       eveParticle->SetName( particleName.str() ) ;
-      
       // Particle title
       std::stringstream particleTitle ;
       particleTitle << "Energy =" << energy << " GeV" << std::endl ;
@@ -253,7 +258,6 @@ namespace lceve {
       particleTitle << "----------------------------------" << std::endl ;
       particleTitle << this->PropertiesAsString( parameters.fProperties ) ;
       eveParticle->SetTitle( particleTitle.str() ) ;
-      
       // release on return
       return eveParticle.release() ;
     }
