@@ -165,10 +165,6 @@ namespace lceve {
     std::optional<MarkerAttributes>                    fMarkerAttributes {} ;
     /// The list of calorimeter hits
     std::optional<std::vector<CaloHitParameters>>      fCaloHits {} ;
-    /// The cluster color.
-    /// If set, all calo hits will have the same color
-    /// Else, the individual calo hit amplitudes are used
-    std::optional<Color_t>                             fColor {} ;
     /// Additional cluster properties
     PropertyMap                                        fProperties {} ;
   };
