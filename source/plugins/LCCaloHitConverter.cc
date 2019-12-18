@@ -10,6 +10,8 @@
 // -- lcio headers
 #include <EVENT/LCCollection.h>
 #include <EVENT/CalorimeterHit.h>
+#include <EVENT/SimCalorimeterHit.h>
+#include <UTIL/LCIOTypeInfo.h>
 
 // -- std headers
 #include <map>
@@ -20,6 +22,7 @@
 
 namespace lceve {
   
+  template <typename T>
   class LCCaloHitConverter : public ICollectionConverter {
   public:
     /// Default constructor
@@ -28,43 +31,31 @@ namespace lceve {
     ///  Create tracks out of EVENT::Track objects
     ROOT::REveElement* ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) override ;
     
-  private:
-    using SortFunctionMap_t = LCIOHelper::SortFunctionMap_t<EVENT::CalorimeterHit> ;    
-    SortFunctionMap_t                fSortFunctions {} ;
+    /// Get the default marker style
+    int GetDefaultMarkerStyle() const ;
   };
   
   //--------------------------------------------------------------------------
   //--------------------------------------------------------------------------
   
-  LCCaloHitConverter::LCCaloHitConverter() {
-    fSortFunctions[ "None" ] = [](const EVENT::CalorimeterHit *, const EVENT::CalorimeterHit *) {
-      return false ; 
-    } ;
-    fSortFunctions[ "Energy" ] = [](const EVENT::CalorimeterHit *lhs, const EVENT::CalorimeterHit *rhs ) { 
-      return lhs->getEnergy() > rhs->getEnergy() ;
-    } ;
+  template <typename T>
+  LCCaloHitConverter<T>::LCCaloHitConverter() {
   }
   
   //--------------------------------------------------------------------------
   
-  ROOT::REveElement* LCCaloHitConverter::ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) {
-    if( collection->getTypeName() != EVENT::LCIO::CALORIMETERHIT ) {
-      std::cout << "ERROR: Expected collection type EVENT::LCIO::CALORIMETERHIT, got " << collection->getTypeName() << std::endl ;
+  template <typename T>
+  ROOT::REveElement* LCCaloHitConverter<T>::ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) {
+    std::string typeName = UTIL::lctypename<T>() ;
+    if( collection->getTypeName() != typeName ) {
+      std::cout << "ERROR: Expected collection type " << typeName << " , got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    auto caloHits = LCIOHelper::CollectionAsVector<EVENT::CalorimeterHit>( collection ) ;
+    auto caloHits = LCIOHelper::CollectionAsVector<T>( collection ) ;
     
-    // CalorimeterHit coloring
-    auto color = GetParameter<std::string>( "Color" ).value_or( "iter" ) ;
+    // hit coloring
+    auto color = GetParameter<std::string>( "Color" ).value() ;
     auto colorFunctor = ColorHelper::GetColorFunction( color ) ;
-    
-    // Sort cluster
-    auto sortPolicy = GetParameter<std::string>( "SortPolicy" ).value_or( "None" ) ;
-    auto policyIter = fSortFunctions.find( sortPolicy ) ;
-    if( fSortFunctions.end() == policyIter ) {
-      policyIter = fSortFunctions.find( "None" ) ;
-    }
-    std::sort( caloHits.begin(), caloHits.end(), policyIter->second ) ;
     
     LCObjectFactory lcFactory( this->GetEventDisplay() ) ;
     EveElementFactory eveFactory( this->GetEventDisplay() ) ;
@@ -74,7 +65,7 @@ namespace lceve {
     eveCaloHitList->SetMainColor( kPink ) ;
     eveCaloHitList->SetMarkerColor( colorFunctor() ) ;
     eveCaloHitList->SetMarkerSize( GetParameter<int>( "MarkerSize" ).value_or( 3 ) ) ;
-    eveCaloHitList->SetMarkerStyle( GetParameter<int>( "MarkerStyle" ).value_or( 4 ) ) ;
+    eveCaloHitList->SetMarkerStyle( GetParameter<int>( "MarkerStyle" ).value_or( GetDefaultMarkerStyle() ) ) ;
     
     auto params = lcFactory.ConvertCaloHits( caloHits ) ;
     eveFactory.PopulateCaloHits( eveCaloHitList.get(), params ) ;
@@ -82,8 +73,20 @@ namespace lceve {
     return eveCaloHitList.release() ;
   }
   
+  //--------------------------------------------------------------------------
+  
+  template <typename T>
+  int LCCaloHitConverter<T>::GetDefaultMarkerStyle() const {
+    return (UTIL::lctypename<T>() == EVENT::LCIO::SIMCALORIMETERHIT) ? 5 : 4 ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  using LCCalorimeterHitConverter = LCCaloHitConverter<EVENT::CalorimeterHit> ;
+  using LCSimCalorimeterHitConverter = LCCaloHitConverter<EVENT::SimCalorimeterHit> ;
 }
 
 using namespace lceve ;
 // Declare converter plugin
-LCEVE_DECLARE_CONVERTER_NS(lceve, LCCaloHitConverter)
+LCEVE_DECLARE_CONVERTER_NS(lceve, LCCalorimeterHitConverter)
+LCEVE_DECLARE_CONVERTER_NS(lceve, LCSimCalorimeterHitConverter)
