@@ -6,6 +6,7 @@
 
 // -- lcio headers
 #include <EVENT/LCEvent.h>
+#include <EVENT/LCCollection.h>
 
 // -- dd4hep headers
 #include <DD4hep/Plugins.h>
@@ -53,6 +54,7 @@ namespace lceve {
         std::cout << "Caught DataNotAvailableException: " << e.what() << std::endl ;
         continue ;
       }
+      std::cout << "Loading collection " << collectionName << ", type " << collection->getTypeName() << ", " << collection->getNumberOfElements() << " elements" << std::endl ;
       auto eveElement = cvt.second->ProcessCollection( collectionName, collection ) ;
       if( nullptr != eveElement ) {
         eventScene->AddElement( eveElement ) ;
