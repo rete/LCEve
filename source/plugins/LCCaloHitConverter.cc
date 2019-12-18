@@ -48,11 +48,10 @@ namespace lceve {
   //--------------------------------------------------------------------------
   
   ROOT::REveElement* LCCaloHitConverter::ProcessCollection( const std::string &name, const EVENT::LCCollection *const collection ) {
-    if( collection->getTypeName() != EVENT::LCIO::CLUSTER ) {
-      std::cout << "ERROR: Expected collection type EVENT::LCIO::CLUSTER, got " << collection->getTypeName() << std::endl ;
+    if( collection->getTypeName() != EVENT::LCIO::CALORIMETERHIT ) {
+      std::cout << "ERROR: Expected collection type EVENT::LCIO::CALORIMETERHIT, got " << collection->getTypeName() << std::endl ;
       return nullptr ;
     }
-    std::cout << "Converting cluster collection " << name << std::endl ;
     auto caloHits = LCIOHelper::CollectionAsVector<EVENT::CalorimeterHit>( collection ) ;
     
     // CalorimeterHit coloring
