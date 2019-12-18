@@ -73,8 +73,8 @@ namespace lceve {
     eveCaloHitList->SetName( name ) ;
     eveCaloHitList->SetMainColor( kPink ) ;
     eveCaloHitList->SetMarkerColor( colorFunctor() ) ;
-    eveCaloHitList->SetMarkerSize( 3 ) ;
-    eveCaloHitList->SetMarkerStyle( 4 ) ;
+    eveCaloHitList->SetMarkerSize( GetParameter<int>( "MarkerSize" ).value_or( 3 ) ) ;
+    eveCaloHitList->SetMarkerStyle( GetParameter<int>( "MarkerStyle" ).value_or( 4 ) ) ;
     
     auto params = lcFactory.ConvertCaloHits( caloHits ) ;
     eveFactory.PopulateCaloHits( eveCaloHitList.get(), params ) ;
