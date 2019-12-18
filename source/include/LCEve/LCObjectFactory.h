@@ -40,8 +40,10 @@ namespace lceve {
     /// Convert a LCIO vertex object
     VertexParameters ConvertVertex( const EVENT::Vertex *const vertex ) const ;
     
-    /// Convert LCIO calo hits object
-    std::vector<CaloHitParameters> ConvertCaloHits( const std::vector<EVENT::CalorimeterHit *> &caloHits ) const ;
+    /// Convert LCIO hit objects
+    /// Works with CalorimeterHit and SimCalorimeterHit
+    template <typename T>
+    std::vector<CaloHitParameters> ConvertCaloHits( const std::vector<T*> &caloHits ) const ;
     
     // /// Convert a LCIO sim calo hit object
     // CaloHitParameters ConvertCaloHit( const EVENT::SimCalorimeterHit *const caloHit ) const ;

@@ -107,7 +107,8 @@ namespace lceve {
   
   //--------------------------------------------------------------------------
   
-  std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::CalorimeterHit *> &caloHits ) const {
+  template <typename T>
+  std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<T*> &caloHits ) const {
     if( caloHits.empty() ) {
       return {} ;
     }
@@ -166,5 +167,7 @@ namespace lceve {
     }
     return parameters ;
   }
-    
+  
+  template std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::CalorimeterHit*> &caloHits ) const ;
+  template std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::SimCalorimeterHit*> &caloHits ) const ;
 }
