@@ -168,6 +168,37 @@ namespace lceve {
     return parameters ;
   }
   
+  //--------------------------------------------------------------------------
+  
+  MCParticleParameters LCObjectFactory::ConvertMCParticle( const EVENT::MCParticle *const mcp ) const {
+    
+    auto color = ColorHelper::RandomColor( mcp ) ;
+    LineAttributes lineAttr {} ;
+    lineAttr.fColor = color ;
+    lineAttr.fStyle = kDashed ;
+    lineAttr.fWidth = 2 ;
+    MarkerAttributes markerAttr {} ;
+    markerAttr.fColor = color ;
+    
+    MCParticleParameters parameters {} ;
+    parameters.fEnergy = mcp->getEnergy() ;
+    parameters.fCharge = mcp->getCharge() ;
+    parameters.fMass = mcp->getMass() ;
+    parameters.fPDG = mcp->getPDG() ;
+    parameters.fLineAttributes = lineAttr ;
+    parameters.fMarkerAttributes = markerAttr ;
+    auto v = mcp->getVertex() ;
+    auto ep = mcp->getEndpoint() ;
+    parameters.fVertexPosition = ROOT::REveVectorT<float>( v[0]*0.1, v[1]*0.1, v[2]*0.1 ) ;
+    parameters.fVertexMomentum = ROOT::REveVectorT<float>( mcp->getMomentum() ) ;
+    parameters.fEndpointPosition = ROOT::REveVectorT<float>( ep[0]*0.1, ep[1]*0.1, ep[2]*0.1 ) ;
+    parameters.fEndpointMomentum = ROOT::REveVectorT<float>( mcp->getMomentumAtEndpoint() ) ;
+    
+    return parameters ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
   template std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::CalorimeterHit*> &caloHits ) const ;
   template std::vector<CaloHitParameters> LCObjectFactory::ConvertCaloHits( const std::vector<EVENT::SimCalorimeterHit*> &caloHits ) const ;
 }

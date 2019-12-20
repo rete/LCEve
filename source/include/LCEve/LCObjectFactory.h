@@ -57,8 +57,8 @@ namespace lceve {
     // /// Convert a LCIO jet (reco particle) object
     // JetParameters ConvertJet( const EVENT::ReconstructedParticle *const jet ) const ;
     
-    // /// Convert a LCIO MC particle object
-    // MCParticleParameters ConvertMCParticle( const EVENT::MCParticle *const mcp ) const ;
+    /// Convert a LCIO MC particle object
+    MCParticleParameters ConvertMCParticle( const EVENT::MCParticle *const mcp ) const ;
     
     // TODO Tracker Hit, etc ...
     
