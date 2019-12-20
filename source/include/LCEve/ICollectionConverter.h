@@ -9,6 +9,9 @@
 #include <LCEve/EventDisplay.h>
 #include <LCEve/ROOTTypes.h>
 
+// -- lcio headers
+#include <UTIL/BitField64.h>
+
 namespace EVENT {
   class LCCollection ;
 }
@@ -40,6 +43,10 @@ namespace lceve {
     /// Get a parameter
     template <typename T>
     std::optional<T> GetParameter( const std::string &key ) const ;
+    
+    /// Get a parameter as vector
+    template <typename T>
+    std::optional<std::vector<T>> GetParameters( const std::string &key ) const ;
     
   private:
     /// The event display instance
@@ -76,6 +83,30 @@ namespace lceve {
       return std::nullopt ;
     }
     return value ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  template <typename T>
+  inline std::optional<std::vector<T>> ICollectionConverter::GetParameters( const std::string &key ) const {
+    auto iter = fParameters.find( key ) ;
+    if( fParameters.end() == iter ) {
+      return std::nullopt ;
+    }
+    std::vector<std::string> tokensStr ;
+    UTIL::LCTokenizer tokenizer( tokensStr, ' ' ) ;
+    std::for_each( iter->second.begin(), iter->second.end(), tokenizer ) ;
+    std::vector<T> values {} ;
+    values.reserve( tokensStr.size() ) ;
+    for( auto &tok : tokensStr ) {
+      std::stringstream ss(tok) ;
+      T value ;
+      if( (ss >> value).fail() ) {
+        return std::nullopt ;
+      }
+      values.push_back( value ) ;
+    }
+    return values ;
   }
   
 }
