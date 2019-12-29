@@ -16,6 +16,8 @@
 // -- lceve headers
 #include <LCEve/ROOTTypes.h>
 
+class TiXmlElement ;
+
 namespace lceve {
 
   class EventDisplay ;
@@ -35,7 +37,7 @@ namespace lceve {
     Geometry( EventDisplay *lced ) ;
 
     /// Load the DD4hep compact file
-    void LoadCompactFile( const std::string &compactFile ) ;
+    void LoadCompactFile( const std::string &compactFile, const TiXmlElement *element ) ;
     /// Whether the geometry has been loaded
     bool GeometryLoaded() const ;
     /// Get the dd4hep detector instance
@@ -62,7 +64,7 @@ namespace lceve {
     static ROOT::REveElement *LoadDetElement( dd4hep::DetElement det, int levels, ROOT::REveElement* parent ) ;
 
     /// Load the DD4hep geometry in Eve 
-    void LoadGeometry( dd4hep::Detector &detector ) ;
+    void LoadGeometry( dd4hep::Detector &detector, const std::set<std::string> &subdets ) ;
 
     /// Extract the detector out of the compact file
     /// Can be either the file name without extension

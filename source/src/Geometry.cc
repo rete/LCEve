@@ -3,6 +3,7 @@
 #include <LCEve/EventDisplay.h>
 #include <LCEve/Geometry.h>
 #include <LCEve/BField.h>
+#include <LCEve/XMLHelper.h>
 
 // -- root headers
 #include <ROOT/REveManager.hxx>
@@ -23,6 +24,12 @@
 #include <DD4hep/Volumes.h>
 #include <XML/DocumentHandler.h>
 
+// -- tinyxml headers
+#include <tinyxml.h>
+
+// -- lcio headers
+#include <UTIL/BitField64.h>
+
 namespace lceve {
 
   Geometry::Geometry( EventDisplay *lced ) :
@@ -38,7 +45,7 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  void Geometry::LoadCompactFile( const std::string &compactFile ) {
+  void Geometry::LoadCompactFile( const std::string &compactFile, const TiXmlElement *element ) {
     if( GeometryLoaded() ) {
       std::cout << "WARNING: Geometry already loaded! Not loading again..." << std::endl ;
       return ;
@@ -48,7 +55,16 @@ namespace lceve {
     fDetectorName = ExtractDetectorName( compactFile ) ;
     std::cout << "Detector name: "<< fDetectorName << std::endl ;
     std::cout << "Loading geometry in Eve. Please be patient..." << std::endl ;
-    LoadGeometry( theDetector ) ;
+    std::set<std::string> subdets {} ;
+    auto geoXML = element->FirstChildElement( "geometry" ) ;
+    if( nullptr != geoXML ) {
+      auto subdetsStr = XMLHelper::GetParameterValue( geoXML, "Subdetectors" ) ;
+      std::vector<std::string> subdetsVec ;
+      UTIL::LCTokenizer tokenizer( subdetsVec, ' ' ) ;
+      std::for_each( subdetsStr.begin(), subdetsStr.end(), tokenizer ) ;
+      subdets.insert( subdetsVec.begin(), subdetsVec.end() ) ;
+    }    
+    LoadGeometry( theDetector, subdets ) ;
     // Cache a few geometry variables
     this->CacheVariables() ;
     std::cout << "Loading geometry: done!" << std::endl ;
@@ -212,7 +228,7 @@ namespace lceve {
 
   //--------------------------------------------------------------------------
 
-  void Geometry::LoadGeometry( dd4hep::Detector &detector ) {
+  void Geometry::LoadGeometry( dd4hep::Detector &detector, const std::set<std::string> &subdets ) {
     dd4hep::DetElement world = detector.world();
     int levels = fEventDisplay->GetSettings().GetDetectorLevel() ;
     const dd4hep::DetElement::Children& c = world.children();
@@ -222,6 +238,9 @@ namespace lceve {
     else if ( levels > 0 ) {
       auto parent = fEventDisplay->GetEveManager()->GetGlobalScene() ;
       for (auto i = c.begin(); i != c.end(); ++i) {
+        if( (not subdets.empty()) and (subdets.find( (*i).first ) == subdets.end() ) ) {
+          continue ;
+        }
         std::cout << "  Loading detector " << (*i).first << " ..." << std::endl ;
         dd4hep::DetElement de = (*i).second ;
         ROOT::REveElement* e = LoadDetElement(de, levels, parent);
