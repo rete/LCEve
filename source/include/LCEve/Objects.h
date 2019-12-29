@@ -35,7 +35,7 @@ namespace lceve {
   using EveTrack = ROOT::REveTrack ;
   using EveVertex = ROOT::REveEllipsoid ;
   using EveCluster = CaloHitContainer ;
-  using EveRecoParticle = ROOT::REveElement ;
+  using EveRecoParticle = ROOT::REveCompound ;
   using EveJet = ROOT::REveJetCone ;
   using EveMCParticle = ROOT::REveTrack ;
   // NOTE: Calo hit and tracker hit have no Eve equivalents
