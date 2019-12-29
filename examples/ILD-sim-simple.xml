@@ -1,5 +1,16 @@
 <lceve>  
   
+  <!-- Geometry parameters -->
+  <geometry>
+    <parameter name="Subdetectors"> 
+      EcalBarrel EcalEndcap EcalPlug
+      HcalBarrel HcalEndcap HcalRing 
+      SET SIT
+      TPC VXD 
+      YokeBarrel YokeEndcap
+    </parameter>
+  </geometry>
+  
   <!-- MC particles -->
   <collection name="MCParticle" plugin="LCMCParticleConverter">
     <parameter name="Color"> pdg </parameter>
