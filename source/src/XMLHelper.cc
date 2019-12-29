@@ -40,4 +40,23 @@ namespace lceve {
     }
   }
   
+  //--------------------------------------------------------------------------
+  
+  std::string XMLHelper::GetParameterValue( const TiXmlElement *element, const std::string &name ) {
+    for( auto p = element->FirstChildElement( "parameter" ) ; nullptr != p ; p = p->NextSiblingElement( "parameter" ) ) {
+      // read parameter name
+      const char* key = p->Attribute( "name" );
+      if( nullptr == key ) {
+        continue ;
+      }
+      if( p->FirstChild() ) {
+        return p->FirstChild()->ValueStr() ;
+      }
+      else {
+        return "" ;
+      }
+    }
+    return "" ;
+  }
+  
 }

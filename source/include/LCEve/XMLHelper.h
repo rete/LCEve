@@ -28,6 +28,9 @@ namespace lceve {
     /// 'element' is the parent XML elemnt of the <collection> tags
     static void ReadCollectionsConfig( const TiXmlElement *element, CollectionConfigList_t &config ) ;
     
+    /// Get the parameter value. Look for a child element 'parameter' with 
+    /// the attribute 'name' and returns the inner element text 
+    static std::string GetParameterValue( const TiXmlElement *element, const std::string &name ) ;
   };
   
 }
