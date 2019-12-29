@@ -24,6 +24,7 @@ namespace ROOT {
     class REvePointSet ;
     class REveBoxSet ;
     class REveEllipsoid ;
+    class REveCompound ;
   }
   // Import Experimental namespace in ROOT namespace,
   // not in global namespace
