@@ -129,7 +129,7 @@ namespace lceve {
 
     fEventConverter->Init( root ) ;
     /// Load the DD4hep compact file
-    fGeometry->LoadCompactFile( compactFileArg.getValue() ) ;
+    fGeometry->LoadCompactFile( compactFileArg.getValue(), root ) ;
     /// Initialize the LCIO event navigator
     fNavigator->Init() ;
     /// Open the LCIO files if any
