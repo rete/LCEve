@@ -4,6 +4,7 @@
 #include <LCEve/Geometry.h>
 #include <LCEve/BField.h>
 #include <LCEve/HelixClass.h>
+#include <LCEve/ParticleHelper.h>
 
 namespace lceve {
   
@@ -173,9 +174,10 @@ namespace lceve {
   MCParticleParameters LCObjectFactory::ConvertMCParticle( const EVENT::MCParticle *const mcp ) const {
     
     auto color = ColorHelper::RandomColor( mcp ) ;
+    auto particle = ParticleHelper::GetParticle( mcp->getPDG() ) ;
     LineAttributes lineAttr {} ;
     lineAttr.fColor = color ;
-    lineAttr.fStyle = kDashed ;
+    lineAttr.fStyle = ParticleHelper::IsNeutral( particle ) ? kDashed : kSolid ;
     lineAttr.fWidth = 2 ;
     MarkerAttributes markerAttr {} ;
     markerAttr.fColor = color ;
