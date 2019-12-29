@@ -1,5 +1,6 @@
 
 #include <LCEve/DrawAttributes.h>
+#include <LCEve/ParticleHelper.h>
 
 #include <UTIL/BitField64.h>
 
@@ -16,6 +17,8 @@ namespace lceve {
     kGreen-9, kBlue-9, kRed-9, kMagenta-9, kCyan-9,
     kViolet-9, kPink-9, kOrange-9, kYellow-9
   };
+  
+  //--------------------------------------------------------------------------
   
   const ColorNameList_t ColorHelper::fgPredefinedColorNames = {
     // Standard colors
@@ -91,6 +94,29 @@ namespace lceve {
       } ;
     }
     return nullptr ;
+  }
+  
+  //--------------------------------------------------------------------------
+  
+  ColorType_t ColorHelper::GetPDGColor( int pdg ) {
+    auto particle = ParticleHelper::GetParticle( pdg ) ;
+    if( nullptr == particle ) {
+      return kBlack ; // Can happen with weird generator particles ...
+    }
+    if( ParticleHelper::IsPhoton( particle ) ) {
+      return kCyan ;
+    }
+    if( ParticleHelper::IsMuon( particle ) ) {
+      return kOrange ;
+    }
+    if( ParticleHelper::IsElectron( particle ) ) {
+      return kAzure ;
+    }
+    if( ParticleHelper::IsHadron( particle ) ) {
+      return kRed ;
+    }
+    // random color if not found
+    return RandomColor( &pdg ) ;
   }
 
 }

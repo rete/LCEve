@@ -47,6 +47,9 @@ namespace lceve {
       auto addr = reinterpret_cast<std::size_t>( ptr ) ;
       return fgPredefinedColors[addr % fgPredefinedColors.size()] ;
     }
+    
+    /// Get a color has a function of the PDG value
+    static ColorType_t GetPDGColor( int pdg ) ;
   };
   
   /**
