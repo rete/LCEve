@@ -9,6 +9,7 @@
 #include <ROOT/REveTrack.hxx>
 #include <ROOT/REveVSDStructs.hxx>
 #include <ROOT/REveEllipsoid.hxx>
+#include <ROOT/REveCompound.hxx>
 #include <Math/GenVector/LorentzVector.h>
 #include <TMatrixDEigen.h>
 #include <TMatrixDSym.h>
@@ -200,6 +201,10 @@ namespace lceve {
   EveRecoParticle *EveElementFactory::CreateRecoParticle( const RecoParticleParameters &parameters ) const {
     try {
       auto eveParticle = std::make_unique<EveRecoParticle>() ;
+      if( parameters.fColor.has_value() ) {
+        eveParticle->SetMainColor( parameters.fColor.value() ) ;
+      }
+      eveParticle->OpenCompound() ;
       // Add tracks if any
       if( parameters.fTracks ) {
         auto tracks = parameters.fTracks.value() ;
@@ -234,7 +239,8 @@ namespace lceve {
           eveClusters->AddElement( this->CreateCluster( cl ) ) ;
         }
         eveParticle->AddElement( eveClusters.release() ) ;
-      }      
+      }
+      eveParticle->CloseCompound() ;
       auto mom = parameters.fMomentum.value() ;
       auto energy = parameters.fEnergy.value() ;
       // Particle name
