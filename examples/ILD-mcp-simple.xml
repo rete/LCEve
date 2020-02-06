@@ -1,0 +1,24 @@
+<lceve>  
+  
+  <!-- Geometry parameters -->
+  <geometry>
+    <parameter name="Subdetectors"> 
+      EcalBarrel EcalEndcap EcalPlug
+      HcalBarrel HcalEndcap HcalRing 
+      SET SIT
+      TPC VXD 
+      YokeBarrel YokeEndcap
+    </parameter>
+  </geometry>
+  
+  <!-- MC particles -->
+  <collection name="MCParticle" plugin="LCMCParticleConverter">
+    <parameter name="Color"> pdg </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MinEnergy"> 0.01 </parameter>
+    <!-- <parameter name="MaxEnergy"> 100 </parameter> -->
+    <!-- <parameter name="PDGOnly"> 22 </parameter> -->
+    <parameter name="GeneratorStatusOnly"> 1 </parameter>
+  </collection>
+  
+</lceve>
