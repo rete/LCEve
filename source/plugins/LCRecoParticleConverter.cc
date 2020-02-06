@@ -15,6 +15,8 @@
 #include <map>
 #include <functional>
 
+#include <ROOT/REveCompound.hxx>
+
 namespace lceve {
   
   class LCRecoParticleConverter : public ICollectionConverter {
