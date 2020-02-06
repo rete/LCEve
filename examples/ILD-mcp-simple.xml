@@ -13,7 +13,7 @@
   
   <!-- MC particles -->
   <collection name="MCParticle" plugin="LCMCParticleConverter">
-    <parameter name="Color"> pdg </parameter>
+    <parameter name="Color"> iter </parameter>
     <parameter name="SortPolicy"> Energy </parameter>
     <parameter name="MinEnergy"> 0.01 </parameter>
     <!-- <parameter name="MaxEnergy"> 100 </parameter> -->
