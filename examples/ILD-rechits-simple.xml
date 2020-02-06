@@ -1,0 +1,60 @@
+<lceve>  
+  <!-- ECal hits -->
+  <collection name="EcalBarrelCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection>   
+  <collection name="EcalEndcapsCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection> 
+  <collection name="EcalEndcapRingCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> blue </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection>
+  
+  <!-- HCal hits -->
+  <collection name="HcalBarrelCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  <collection name="HcalEndcapsCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection> 
+  <collection name="HcalEndcapRingCollectionRec" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> magenta </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 5 </parameter>
+  </collection>
+  
+  <!-- Forward calorimeters -->
+  <collection name="BCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection> 
+  <collection name="LCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection> 
+  <collection name="LHCAL" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> red </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 3 </parameter>
+  </collection> 
+  
+  <!-- Muon system -->
+  <collection name="MUON" plugin="LCCalorimeterHitConverter">
+    <parameter name="Color"> darkYellow </parameter>
+    <parameter name="SortPolicy"> Energy </parameter>
+    <parameter name="MarkerSize"> 7 </parameter>
+  </collection> 
+  
+</lceve>
