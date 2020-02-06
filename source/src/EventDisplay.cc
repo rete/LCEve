@@ -91,6 +91,10 @@ namespace lceve {
     TCLAP::SwitchArg serverModeArg( "s", "server-mode",
       "Whether to run in server mode. Do not show any window on startup but the url only", false) ;
     cmd.add( serverModeArg ) ;
+    
+    TCLAP::SwitchArg clearCacheArg( "z", "clear-cache",
+      "Whether to clear the cache in browser on reload (only for Eve)", false) ;
+    cmd.add( clearCacheArg ) ;
 
     TCLAP::ValueArg<int> portArg( "p", "port",
       "The http port to use", false, 0, "int") ;
@@ -141,16 +145,20 @@ namespace lceve {
     auto ui5Dir = std::string(LCEVE_DIR) + "/ui5" ;
     GetEveManager()->AddLocation("lceve/", ui5Dir) ;
     GetEveManager()->SetDefaultHtmlPage("file:lceve/lceve.html") ;
+    
+    if( clearCacheArg.getValue() ) {
+      std::cout << "Will clear browser cache on page reload..." << std::endl ;
+      gEnv->SetValue("WebGui.HttpMaxAge", 0) ;
+    }
+    if( serverModeArg.getValue() ) {
+      std::cout << "Will start EveManager in server mode..." << std::endl ;
+      gEnv->SetValue("WebEve.DisableShow", 1) ;
+    }
   }
 
   //--------------------------------------------------------------------------
 
-  void EventDisplay::Run() {
-    if( GetSettings().GetServerMode() ) {
-      gEnv->SetValue("WebEve.DisableShow", 1) ;
-    }
-#pragma message "TODO: Add a proper option on command line for clearing browser cache"
-    gEnv->SetValue("WebGui.HttpMaxAge", 0) ;
+  void EventDisplay::Run() { 
     GetEveManager()->Show() ;
     GetApplication()->Run() ;
   }
